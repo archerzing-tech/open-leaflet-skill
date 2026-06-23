@@ -2,7 +2,7 @@
 
 Agent skill for generating interactive Leaflet.js map HTML components from natural language descriptions. Supports 2D maps, 3D buildings (OSMBuildings), map card popups/tooltips, visual effects, and choropleth visualization with built-in China province GeoJSON data.
 
-> **For the skill definition (agent consumption), see [`open-leaflet-skill/SKILL.md`](./open-leaflet-skill/SKILL.md).**  
+> **For the skill definition (agent consumption), see [`SKILL.md`](./SKILL.md).**  
 > This README is for humans browsing the repository.
 
 ---
@@ -13,7 +13,7 @@ Agent skill for generating interactive Leaflet.js map HTML components from natur
 git clone https://github.com/archerzing-tech/open-leaflet-skill ~/.agents/skills/leaflet/
 ```
 
-Supported agents: opencode, hermes, claude-code. Point your agent to the `open-leaflet-skill/` subdirectory to load `SKILL.md`.
+Supported agents: opencode, hermes, claude-code. The agent auto-loads `SKILL.md` from the root of this directory.
 
 **Usage example for agents:**
 
@@ -30,7 +30,7 @@ Supported agents: opencode, hermes, claude-code. Point your agent to the `open-l
 
 ![sichuan-highlight](assets/examples/screenshot-sichuan.png)
 
-Full file: `open-leaflet-skill/assets/examples/sichuan-highlight.html`
+Full file: `assets/examples/sichuan-highlight.html`
 
 ---
 
@@ -38,7 +38,7 @@ Full file: `open-leaflet-skill/assets/examples/sichuan-highlight.html`
 
 ![chengdu-pois](assets/examples/screenshot-chengdu.png)
 
-Full file: `open-leaflet-skill/assets/examples/chengdu-pois.html`
+Full file: `assets/examples/chengdu-pois.html`
 
 ---
 
@@ -46,7 +46,7 @@ Full file: `open-leaflet-skill/assets/examples/chengdu-pois.html`
 
 ![choropleth](assets/examples/screenshot-choropleth.png)
 
-Full file: `open-leaflet-skill/assets/examples/choropleth-population.html`
+Full file: `assets/examples/choropleth-population.html`
 
 ---
 
@@ -54,43 +54,40 @@ Full file: `open-leaflet-skill/assets/examples/choropleth-population.html`
 
 | File | Description |
 |------|-------------|
-| `open-leaflet-skill/assets/leaf-demo.html` | Province highlight + hover/click interaction |
-| `open-leaflet-skill/assets/leaf-effects.html` | Effects: mask, glow, pulse, marching ants, color transform |
-| `open-leaflet-skill/assets/leaf-3d-demo.html` | 3D buildings (Shanghai/Beijing/Chengdu/Shenzhen) + height coloring |
-| `open-leaflet-skill/assets/leaf-card-demo.html` | 6 POI cards + province metric card in 3 modes (popup/tooltip/float) |
+| `assets/leaf-demo.html` | Province highlight + hover/click interaction |
+| `assets/leaf-effects.html` | Effects: mask, glow, pulse, marching ants, color transform |
+| `assets/leaf-3d-demo.html` | 3D buildings (Shanghai/Beijing/Chengdu/Shenzhen) + height coloring |
+| `assets/leaf-card-demo.html` | 6 POI cards + province metric card in 3 modes (popup/tooltip/float) |
 
 ---
 
 ## Directory Structure
 
 ```
-leaflet/                          # ~/.agents/skills/leaflet/
+open-leaflet-skill/               # GitHub repo = agent skill root
 ├── README.md                     # Project intro (this file)
-├── assets/                       # Screenshots (outside skill folder)
-│   └── examples/
-│       ├── screenshot-sichuan.png
-│       ├── screenshot-chengdu.png
-│       └── screenshot-choropleth.png
-└── open-leaflet-skill/           # Skill content (for agents)
-    ├── SKILL.md                  # Agent skill definition (main entry)
-    ├── lib/                      # Leaflet 1.9.4 (local, no CDN)
-    │   ├── leaflet.css
-    │   └── leaflet.js
-    ├── references/               # Reference guides
-    ├── data/                     # GeoJSON data
-    │   ├── china_provinces.geojson
-    │   ├── taiwan.geojson
-    │   ├── hongkong.geojson
-    │   └── macau.geojson
-    └── assets/                   # Demo HTML files
-        ├── leaf-demo.html
-        ├── leaf-effects.html
-        ├── leaf-3d-demo.html
-        ├── leaf-card-demo.html
-        └── examples/
-            ├── sichuan-highlight.html
-            ├── chengdu-pois.html
-            └── choropleth-population.html
+├── SKILL.md                      # Agent skill definition (searched by agents)
+├── lib/                          # Leaflet 1.9.4 (local, no CDN)
+│   ├── leaflet.css
+│   └── leaflet.js
+├── references/                   # Reference guides
+├── data/                         # GeoJSON data
+│   ├── china_provinces.geojson
+│   ├── taiwan.geojson
+│   ├── hongkong.geojson
+│   └── macau.geojson
+└── assets/                       # Demo HTML files + screenshots
+    ├── leaf-demo.html
+    ├── leaf-effects.html
+    ├── leaf-3d-demo.html
+    ├── leaf-card-demo.html
+    └── examples/
+        ├── sichuan-highlight.html
+        ├── chengdu-pois.html
+        ├── choropleth-population.html
+        ├── screenshot-sichuan.png
+        ├── screenshot-chengdu.png
+        └── screenshot-choropleth.png
 ```
 
 ## Data Sources
