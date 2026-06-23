@@ -28,7 +28,7 @@ Supported agents: opencode, hermes, claude-code. Point your agent to the `open-l
 
 ### Province Highlight with Metric Card
 
-![sichuan-highlight](open-leaflet-skill/assets/examples/screenshot-sichuan.png)
+![sichuan-highlight](assets/examples/screenshot-sichuan.png)
 
 Full file: `open-leaflet-skill/assets/examples/sichuan-highlight.html`
 
@@ -36,7 +36,7 @@ Full file: `open-leaflet-skill/assets/examples/sichuan-highlight.html`
 
 ### Chengdu POIs with Image Cards
 
-![chengdu-pois](open-leaflet-skill/assets/examples/screenshot-chengdu.png)
+![chengdu-pois](assets/examples/screenshot-chengdu.png)
 
 Full file: `open-leaflet-skill/assets/examples/chengdu-pois.html`
 
@@ -44,7 +44,7 @@ Full file: `open-leaflet-skill/assets/examples/chengdu-pois.html`
 
 ### Population Choropleth
 
-![choropleth](open-leaflet-skill/assets/examples/screenshot-choropleth.png)
+![choropleth](assets/examples/screenshot-choropleth.png)
 
 Full file: `open-leaflet-skill/assets/examples/choropleth-population.html`
 
@@ -66,15 +66,23 @@ Full file: `open-leaflet-skill/assets/examples/choropleth-population.html`
 ```
 leaflet/                          # ~/.agents/skills/leaflet/
 ├── README.md                     # Project intro (this file)
+├── assets/                       # Screenshots (outside skill folder)
+│   └── examples/
+│       ├── screenshot-sichuan.png
+│       ├── screenshot-chengdu.png
+│       └── screenshot-choropleth.png
 └── open-leaflet-skill/           # Skill content (for agents)
     ├── SKILL.md                  # Agent skill definition (main entry)
+    ├── lib/                      # Leaflet 1.9.4 (local, no CDN)
+    │   ├── leaflet.css
+    │   └── leaflet.js
     ├── references/               # Reference guides
     ├── data/                     # GeoJSON data
     │   ├── china_provinces.geojson
     │   ├── taiwan.geojson
     │   ├── hongkong.geojson
     │   └── macau.geojson
-    └── assets/                   # Demo HTML files and screenshots
+    └── assets/                   # Demo HTML files
         ├── leaf-demo.html
         ├── leaf-effects.html
         ├── leaf-3d-demo.html
@@ -82,8 +90,7 @@ leaflet/                          # ~/.agents/skills/leaflet/
         └── examples/
             ├── sichuan-highlight.html
             ├── chengdu-pois.html
-            ├── choropleth-population.html
-            └── screenshot-*.png
+            └── choropleth-population.html
 ```
 
 ## Data Sources

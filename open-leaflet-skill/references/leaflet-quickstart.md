@@ -5,8 +5,8 @@
 ## 1. 引入 Leaflet
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="./lib/leaflet.css" />
+<script src="./lib/leaflet.js"></script>
 ```
 
 ## 2. 创建地图容器
@@ -77,7 +77,7 @@ map.on('click', onMapClick);
 <html>
 <head>
   <title>Leaflet 地图</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="./lib/leaflet.css" />
   <style>
     body { margin: 0; padding: 0; }
     #map { width: 100%; height: 100vh; }
@@ -85,7 +85,7 @@ map.on('click', onMapClick);
 </head>
 <body>
   <div id="map"></div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./lib/leaflet.js"></script>
   <script>
     var map = L.map('map').setView([39.9, 116.4], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

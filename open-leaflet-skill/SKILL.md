@@ -13,7 +13,7 @@ metadata:
 ## 核心原则
 
 1. **从本地 GeoJSON 数据查找地理信息**：`data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `data/taiwan.geojson`、`data/hongkong.geojson`、`data/macau.geojson` 按需加载
-2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用 CDN 加载 Leaflet）
+2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `lib/` 加载 Leaflet）
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
 5. **善用在线数据源**：优先使用 DataV.GeoAtlas API 获取实时数据，OSM Overpass API 获取全球数据
@@ -243,7 +243,7 @@ L.geoJSON(data, {
 
 ### 4. 验证
 - 检查 HTML 文件是否完整
-- 确认 Leaflet CSS/JS 引用正确（via CDN）
+- 确认 Leaflet CSS/JS 引用正确（`lib/leaflet.css`, `lib/leaflet.js`）
 - 确认 GeoJSON 数据路径正确
 - 测试：双击 HTML 文件在浏览器中打开
 
@@ -323,13 +323,17 @@ document.getElementById('chkEffect').addEventListener('change', function() {
 
 根据用户需求，可生成 3D 建筑地图。需要在页面中加载 OSMBuildings Classic 2.5D 作为 Leaflet 插件图层。
 
-### CDN 引用
+### 本地库引用
+
+所有生成的文件优先使用本 skill `lib/` 目录下的 Leaflet 库（1.9.4）：
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="./lib/leaflet.css" />
+<script src="./lib/leaflet.js"></script>
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 ```
+
+**注意**：Leaflet 从本地 `lib/` 加载，OSMBuildings 仍然使用 CDN。生成文件时需将 `lib/` 目录复制到输出目录。
 
 ### 基础集成
 

@@ -188,8 +188,8 @@ src/
 
 ```html
 <!-- Leaflet 1.x (推荐，稳定) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="./lib/leaflet.css" />
+<script src="./lib/leaflet.js"></script>
 
 <!-- Leaflet 2.0 alpha (ESM 模块，2025 年) -->
 <script type="importmap">
