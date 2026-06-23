@@ -381,6 +381,99 @@ fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query
 
 完整 3D 参考见 `references/3d-buildings-guide.md`，可直接运行的 3D 演示见 `assets/leaf-3d-demo.html`（含上海/北京/成都/深圳四城预设 + 建筑高度渐变着色 + 点击高亮 + 阴影开关）。
 
+## Tooltip / 地图卡片
+
+地图上的信息展示采用"卡片"形式（card-style popup / tooltip），支持三种模式。
+
+### 1. 卡式 Popup（点击弹出）
+
+使用 Leaflet 原生 `bindPopup()` + 自定义 CSS，展示图文卡片、标签、按钮。
+
+```javascript
+marker.bindPopup(
+  '<div class="map-card">' +
+    '<img class="map-card-img" src="..." />' +
+    '<div class="map-card-body">' +
+      '<h3>Title</h3>' +
+      '<p>Description</p>' +
+      '<span class="map-card-tag">Tag</span>' +
+    '</div>' +
+  '</div>',
+  { className: 'card-popup', maxWidth: 320 }
+);
+```
+
+```css
+.leaflet-popup.card-popup .leaflet-popup-content-wrapper {
+  padding: 0; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+}
+.leaflet-popup.card-popup .leaflet-popup-content { margin: 0; }
+.map-card-body { padding: 14px 16px; }
+.map-card-img { width: 100%; height: 130px; object-fit: cover; }
+.map-card-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 500; background: #eef2ff; color: #4338ca;
+}
+```
+
+### 2. 卡式 Tooltip（悬停弹出）
+
+适合快速预览，鼠标悬浮时显示迷你卡片。
+
+```javascript
+marker.bindTooltip(
+  '<div class="tooltip-card"><strong>Title</strong><br/><span>Desc</span></div>',
+  { direction: 'top', className: 'card-tooltip', sticky: true }
+);
+```
+
+```css
+.leaflet-tooltip.card-tooltip {
+  padding: 8px 12px; border: 0; border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0,0,0,.12); font-size: 12px;
+}
+```
+
+### 3. 自定义浮动卡片
+
+使用 `map.latLngToContainerPoint()` 计算屏幕坐标，绝对定位 DOM 元素在 map 容器上。支持任意布局（图片、指标表格、按钮等），不依赖 Leaflet popup 样式约束。
+
+```css
+.custom-card {
+  position: absolute; z-index: 1000; background: #fff;
+  border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  width: 290px; overflow: hidden;
+  transition: opacity .25s, transform .25s;
+  opacity: 0; transform: translateY(10px); pointer-events: none;
+}
+.custom-card.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+```
+
+```javascript
+function showCard(latlng, html) {
+  card.innerHTML = html;
+  var pt = map.latLngToContainerPoint(latlng);
+  card.style.left = (pt.x + 16) + 'px';
+  card.style.top = (pt.y - card.offsetHeight / 2) + 'px';
+  card.classList.add('visible');
+}
+function hideCard() { card.classList.remove('visible'); }
+
+marker.on('mouseover', function() { showCard(marker.getLatLng(), html); });
+marker.on('mouseout', hideCard);
+```
+
+### 卡片模板
+
+| 模板 | 适用场景 |
+|------|----------|
+| 图片 + 标题 + 描述 + 标签 | POI 信息、景点介绍 |
+| 数据指标表格 | 省份统计、人口/GDP 数据 |
+| 图 + 操作按钮 | 详情页入口、导航引导 |
+
+容器边界防溢出和完整模板参考 `references/tooltip-card-guide.md`，可直接运行的交互演示见 `assets/leaf-card-demo.html`（成都 6 个 POI 卡片 + 四川省指标卡 + 三种模式切换）。
+
 ## 本地资料
 
 | 文件 | 说明 |
@@ -393,6 +486,7 @@ fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query
 | `references/data-sources.md` | 地理数据源参考（DataV、OSM、Overpass API）|
 | `references/effects-guide.md` | 地图特效指南（遮罩、发光、脉动、颜色变换）|
 | `references/3d-buildings-guide.md` | 3D 建筑场景指南（OSM Buildings API + Overpass 查询） |
+| `references/tooltip-card-guide.md` | 地图卡片 / Tooltip 指南（Popup 卡式化、浮动卡片、模板、约束） |
 | `data/china_provinces.geojson` | 中国省级行政区划 GeoJSON 数据（含港澳台，~1MB） |
 | `data/taiwan.geojson` | 台湾省边界 GeoJSON |
 | `data/hongkong.geojson` | 香港特别行政区边界 GeoJSON（含 18 区） |
@@ -400,6 +494,7 @@ fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query
 | `assets/leaf-demo.html` | 默认演示 HTML（四川省高亮） |
 | `assets/leaf-effects.html` | 特效演示 HTML（遮罩、脉动、发光、蚂蚁线等） |
 | `assets/leaf-3d-demo.html` | 3D 建筑演示 HTML（4 城市预设 + 高度着色 + 点击高亮） |
+| `assets/leaf-card-demo.html` | 地图卡片演示 HTML（6 POI 卡片 + 指标卡 + 3 种模式切换） |
 
 ## 常见用例模板
 
@@ -504,4 +599,22 @@ L.marker([39.9042, 116.3974], { icon: pulseIcon }).addTo(map);
 L.circle([39.9042, 116.3974], {
   radius: 500, color: '#ff4444', fillColor: '#ff4444', fillOpacity: 0.1, weight: 2
 }).addTo(map);
+```
+
+### 用例 7：POI 信息卡片
+**用户说：** "在成都标出几个景点，点击弹出带图片和标签的卡片"
+```javascript
+var pois = [
+  { name: '宽窄巷子', lat: 30.670, lng: 104.052, img: 'https://picsum.photos/seed/kz/400/200', desc: '清代古街巷，茶馆小吃林立', tags: ['历史','美食'] },
+  { name: '锦里', lat: 30.645, lng: 104.047, img: 'https://picsum.photos/seed/jl/400/200', desc: '三国文化仿古商业街', tags: ['美食','拍照'] }
+];
+pois.forEach(function(p) {
+  var tags = p.tags.map(function(t) { return '<span class="map-card-tag">' + t + '</span>'; }).join('');
+  var html = '<div class="map-card">' +
+    '<img class="map-card-img" src="' + p.img + '" />' +
+    '<div class="map-card-body"><h3>' + p.name + '</h3><p>' + p.desc + '</p><div class="tags">' + tags + '</div></div>' +
+    '</div>';
+  L.marker([p.lat, p.lng]).addTo(map).bindPopup(html, { className: 'card-popup', maxWidth: 320 });
+});
+// 需要配套 CSS（见 references/tooltip-card-guide.md）
 ```

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Cards Demo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+#map{height:100%;min-height:300px;width:100%;background:#f0f0f0}
+
+/* ===== Card Popup ===== */
+.leaflet-popup.card-popup .leaflet-popup-content-wrapper {
+  padding: 0; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+}
+.leaflet-popup.card-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+.leaflet-popup.card-popup .leaflet-popup-tip { box-shadow: none; }
+.leaflet-popup.card-popup .leaflet-popup-close-button { top: 6px; right: 6px; color: #fff; opacity: .7; font-size: 18px; }
+
+.map-card { font-family: inherit; }
+.map-card-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+.map-card-body { padding: 14px 16px 16px; }
+.map-card-body h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.map-card-body .sub { margin: 0 0 8px; font-size: 12px; color: #888; }
+.map-card-body p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.5; }
+.map-card-body .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.map-card-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 500;
+  background: #eef2ff; color: #4338ca;
+}
+.map-card-tag.green { background: #ecfdf5; color: #059669; }
+.map-card-tag.orange { background: #fff7ed; color: #d97706; }
+.map-card-tag.purple { background: #f5f3ff; color: #7c3aed; }
+.map-card-footer { padding: 10px 16px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; }
+
+.map-card-btn {
+  padding: 6px 14px; border: 0; border-radius: 6px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  background: #2563eb; color: #fff; transition: background .15s;
+}
+.map-card-btn:hover { background: #1d4ed8; }
+.map-card-btn.outline { background: transparent; color: #2563eb; border: 1px solid #2563eb; }
+.map-card-btn.outline:hover { background: #eef2ff; }
+
+/* ===== Card Tooltip ===== */
+.leaflet-tooltip.card-tooltip {
+  padding: 8px 12px; border: 0; border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0,0,0,.12);
+  font-size: 12px; line-height: 1.4; background: #fff;
+}
+.leaflet-tooltip-top.card-tooltip:before { border-top-color: #fff; }
+.leaflet-tooltip-bottom.card-tooltip:before { border-bottom-color: #fff; }
+.tooltip-card { white-space: nowrap; }
+.tooltip-card strong { font-size: 13px; }
+
+/* ===== Custom Floating Card ===== */
+.custom-card {
+  position: absolute; z-index: 1000;
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  width: 290px; overflow: hidden;
+  transition: opacity .25s, transform .25s;
+  opacity: 0; transform: translateY(10px);
+  pointer-events: none;
+}
+.custom-card.visible {
+  opacity: 1; transform: translateY(0);
+  pointer-events: auto;
+}
+.custom-card-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+.custom-card-body { padding: 14px 16px 16px; }
+.custom-card-body h4 { margin: 0 0 4px; font-size: 15px; }
+.custom-card-body .sub { margin: 0 0 8px; font-size: 12px; color: #888; }
+.custom-card-body p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.5; }
+
+/* ===== Metric Row ===== */
+.metric-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.metric-row:last-child { border-bottom: 0; }
+.metric-label { color: #666; }
+.metric-value { font-weight: 600; }
+.metric-value.gold { color: #d97706; }
+.metric-value.green { color: #059669; }
+.metric-value.blue { color: #2563eb; }
+
+/* ===== UI ===== */
+.ctrl-panel {
+  position: absolute; top: 16px; right: 16px; z-index: 999;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.ctrl-btn {
+  padding: 8px 14px; border: 0; border-radius: 8px;
+  background: #fff; color: #333; font-size: 13px; font-weight: 500;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  transition: all .15s; user-select: none;
+}
+.ctrl-btn:hover { background: #f5f5f5; }
+.ctrl-btn.active { background: #2563eb; color: #fff; }
+.ctrl-btn.active:hover { background: #1d4ed8; }
+
+.attribution {
+  position: absolute; bottom: 4px; right: 4px; z-index: 999;
+  font-size: 10px; color: #999;
+  background: rgba(255,255,255,.7); padding: 2px 6px; border-radius: 4px;
+}
+.attribution a { color: #666; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="ctrl-panel">
+  <button class="ctrl-btn active" id="btnCard">Card Popup</button>
+  <button class="ctrl-btn" id="btnTooltip">Hover Tooltip</button>
+  <button class="ctrl-btn" id="btnFloat">Float Card</button>
+</div>
+
+<div class="custom-card" id="floatCard"></div>
+
+<div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a></div>
+
+<script>
+var map = L.map('map', {
+  center: [30.660, 104.063], zoom: 13,
+  zoomControl: false, attributionControl: false,
+  fadeAnimation: true, zoomAnimation: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, keepBuffer: 8
+}).addTo(map);
+
+// ------ Card template helpers ------
+function imgCard(img, title, sub, desc, tags) {
+  var t = (tags || []).map(function(t) {
+    return '<span class="map-card-tag ' + (t.cls || '') + '">' + t.label + '</span>';
+  }).join('');
+  return '<div class="map-card">' +
+    (img ? '<img class="map-card-img" src="' + img + '" />' : '') +
+    '<div class="map-card-body">' +
+      '<h3>' + title + '</h3>' +
+      (sub ? '<div class="sub">' + sub + '</div>' : '') +
+      (desc ? '<p>' + desc + '</p>' : '') +
+      (t ? '<div class="tags">' + t + '</div>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+function metricCard(title, sub, metrics) {
+  var r = (metrics || []).map(function(m) {
+    return '<div class="metric-row"><span class="metric-label">' + m.label + '</span><span class="metric-value ' + (m.cls || '') + '">' + m.value + '</span></div>';
+  }).join('');
+  return '<div class="map-card"><div class="map-card-body">' +
+    '<h3>' + title + '</h3>' +
+    (sub ? '<div class="sub">' + sub + '</div>' : '') +
+    r +
+  '</div></div>';
+}
+
+// ------ POI data ------
+var pois = [
+  {
+    lat: 30.670, lng: 104.063, name: '天府广场', sub: '市中心地标',
+    desc: '成都市中心最大的广场，毛主席雕像坐落于此，周边汇聚四川科技馆、成都博物馆等文化设施。',
+    tags: [{label:'地标',cls:'orange'},{label:'免费',cls:'green'}],
+    img: 'https://picsum.photos/seed/chengdu1/400/200',
+    tooltip: '成都市中心'
+  },
+  {
+    lat: 30.645, lng: 104.047, name: '锦里古街', sub: '三国文化街区',
+    desc: '武侯祠旁著名的仿古商业街，汇集四川小吃、手工艺品、茶馆，夜晚灯笼亮起时尤美。',
+    tags: [{label:'美食',cls:'green'},{label:'历史',cls:'purple'}],
+    img: 'https://picsum.photos/seed/jinli/400/200',
+    tooltip: '三国文化步行街'
+  },
+  {
+    lat: 30.735, lng: 104.145, name: '大熊猫基地', sub: '世界著名熊猫保护区',
+    desc: '全球最大的大熊猫人工繁育基地，可近距离观察大熊猫、小熊猫等珍稀动物，建议上午参观。',
+    tags: [{label:'动物',cls:'green'},{label:'亲子',cls:'blue'}],
+    img: 'https://picsum.photos/seed/panda/400/200',
+    tooltip: '看熊猫必去'
+  },
+  {
+    lat: 30.620, lng: 104.070, name: '九眼桥', sub: '夜景酒吧街',
+    desc: '成都著名夜景地标，安顺廊桥灯火辉煌，两岸酒吧林立，是体验成都夜生活的好去处。',
+    tags: [{label:'夜生活',cls:'purple'},{label:'拍照',cls:'orange'}],
+    img: 'https://picsum.photos/seed/jiuyan/400/200',
+    tooltip: '夜景酒吧街'
+  },
+  {
+    lat: 30.685, lng: 104.087, name: '春熙路', sub: '成都时尚商业街',
+    desc: '成都最繁华的商业步行街，IFS、太古里等高端商场云集，也是网红打卡地。',
+    tags: [{label:'购物',cls:'blue'},{label:'美食',cls:'green'}],
+    img: 'https://picsum.photos/seed/chunxi/400/200',
+    tooltip: '购物天堂'
+  },
+  {
+    lat: 30.700, lng: 104.045, name: '宽窄巷子', sub: '清代古街巷',
+    desc: '由宽巷子、窄巷子、井巷子组成的老街区，保留清代川西民居风格，茶馆、小吃琳琅满目。',
+    tags: [{label:'历史',cls:'purple'},{label:'美食',cls:'green'}],
+    img: 'https://picsum.photos/seed/kuanzhai/400/200',
+    tooltip: '清代老街'
+  }
+];
+
+var mode = 'card'; // card | tooltip | float
+var markers = [];
+var geojsonLayer;
+
+// Create custom marker icons
+var defaultIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:32px;height:32px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">📍</div>',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+});
+
+var activeIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:36px;height:36px;background:#d97706;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">📍</div>',
+  iconSize: [36, 36],
+  iconAnchor: [18, 18]
+});
+
+// ------ Float Card ------
+var floatCard = document.getElementById('floatCard');
+
+function showFloat(latlng, html) {
+  floatCard.innerHTML = html;
+  var pt = map.latLngToContainerPoint(latlng);
+  var mw = document.getElementById('map');
+  var mr = mw.getBoundingClientRect();
+  var cw = 290, ch = floatCard.offsetHeight || 260;
+  var left = pt.x + 16, top = pt.y - ch / 2;
+  if (left + cw > mr.width - 12) left = pt.x - cw - 16;
+  if (top < 12) top = 12;
+  if (top + ch > mr.height - 12) top = mr.height - ch - 12;
+  floatCard.style.left = Math.max(12, left) + 'px';
+  floatCard.style.top = Math.max(12, top) + 'px';
+  floatCard.classList.add('visible');
+}
+
+function hideFloat() {
+  floatCard.classList.remove('visible');
+}
+
+// ------ Create markers ------
+function createMarkers(modeType) {
+  // Clear old
+  markers.forEach(function(m) { map.removeLayer(m); });
+  markers = [];
+  hideFloat();
+
+  pois.forEach(function(p, i) {
+    var m = L.marker([p.lat, p.lng], { icon: defaultIcon }).addTo(map);
+
+    if (modeType === 'card') {
+      m.bindPopup(imgCard(p.img, p.name, p.sub, p.desc, p.tags), {
+        className: 'card-popup',
+        maxWidth: 320,
+        minWidth: 260
+      });
+      m.bindTooltip(
+        '<div class="tooltip-card"><strong>' + p.name + '</strong><br/><span style="color:#888">' + p.sub + '</span></div>',
+        { direction: 'top', offset: [0, -8], className: 'card-tooltip' }
+      );
+    } else if (modeType === 'tooltip') {
+      m.bindTooltip(
+        '<div class="tooltip-card"><strong>' + p.name + '</strong><br/><span style="font-size:12px;color:#888;">' + p.tooltip + '</span></div>',
+        { direction: 'top', offset: [0, -8], className: 'card-tooltip', sticky: true }
+      );
+    } else if (modeType === 'float') {
+      m.on('mouseover', function() {
+        showFloat(m.getLatLng(), imgCard(p.img, p.name, p.sub, p.desc, p.tags));
+      });
+      m.on('mouseout', hideFloat);
+    }
+
+    markers.push(m);
+  });
+
+  // Add a province polygon as metric card demo
+  if (geojsonLayer) { map.removeLayer(geojsonLayer); }
+
+  fetch('data/china_provinces.geojson')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var sichuan = data.features.find(function(f) { return f.properties.name === '四川省'; });
+      if (!sichuan) return;
+      geojsonLayer = L.geoJSON(sichuan, {
+        style: { color: '#2563eb', weight: 2, fillColor: '#eff6ff', fillOpacity: 0.3 }
+      }).addTo(map);
+
+      // Bind metric card popup on province click
+      if (modeType === 'card' || modeType === 'float') {
+        geojsonLayer.eachLayer(function(layer) {
+          layer.bindPopup(metricCard('四川省', '中国西南省份', [
+            { label: '面积', value: '48.6万 km²', cls: 'gold' },
+            { label: '人口', value: '8372万', cls: 'blue' },
+            { label: '省会', value: '成都市', cls: 'green' },
+            { label: 'GDP', value: '5.9万亿元', cls: 'gold' }
+          ]), { className: 'card-popup', maxWidth: 280 });
+        });
+      }
+    });
+}
+
+createMarkers('card');
+
+// ------ Mode buttons ------
+document.getElementById('btnCard').addEventListener('click', function() {
+  document.querySelectorAll('.ctrl-btn').forEach(function(b) { b.classList.remove('active'); });
+  this.classList.add('active');
+  mode = 'card';
+  hideFloat();
+  createMarkers('card');
+});
+
+document.getElementById('btnTooltip').addEventListener('click', function() {
+  document.querySelectorAll('.ctrl-btn').forEach(function(b) { b.classList.remove('active'); });
+  this.classList.add('active');
+  mode = 'tooltip';
+  hideFloat();
+  createMarkers('tooltip');
+});
+
+document.getElementById('btnFloat').addEventListener('click', function() {
+  document.querySelectorAll('.ctrl-btn').forEach(function(b) { b.classList.remove('active'); });
+  this.classList.add('active');
+  mode = 'float';
+  createMarkers('float');
+});
+
+// ------ Responsive ------
+if (window.ResizeObserver) {
+  new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
+}
+window.addEventListener('resize', function() { map.invalidateSize(); });
+</script>
+</body>
+</html>

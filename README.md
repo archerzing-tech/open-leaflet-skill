@@ -44,7 +44,8 @@ leaflet/
 │   ├── best-practices.md         # 性能优化与最佳实践
 │   ├── data-sources.md           # 地理数据源（DataV, OSM, Overpass）
 │   ├── effects-guide.md          # 地图特效指南
-│   └── 3d-buildings-guide.md     # OSMBuildings 3D 建筑指南
+│   ├── 3d-buildings-guide.md     # OSMBuildings 3D 建筑指南
+│   └── tooltip-card-guide.md    # 地图卡片 / Tooltip 指南
 ├── data/
 │   ├── china_provinces.geojson   # 中国省级边界数据（34 省份 + 港澳台）
 │   ├── taiwan.geojson            # 台湾省边界（独立文件）
@@ -53,7 +54,8 @@ leaflet/
 └── assets/
     ├── leaf-demo.html            # 2D 演示：四川省高亮 + hover/click
     ├── leaf-effects.html         # 特效演示：遮罩/脉动/发光/蚂蚁线/色调
-    └── leaf-3d-demo.html         # 3D 演示：上海/北京/成都/深圳 + 高度着色
+    ├── leaf-3d-demo.html         # 3D 演示：上海/北京/成都/深圳 + 高度着色
+    └── leaf-card-demo.html       # 地图卡片演示：6 POI + 指标卡 + 3 种模式切换
 ```
 
 ## 自然语言示例
@@ -204,9 +206,11 @@ L.circle([39.9042, 116.3974], {
 | `assets/leaf-demo.html` | 四川省高亮 + hover/click 交互 | 双击 / 本地 HTTP 服务 |
 | `assets/leaf-effects.html` | 遮罩、脉动、发光、蚂蚁线、色调变换 | 同上 |
 | `assets/leaf-3d-demo.html` | 4 城市 3D 建筑 + 高度着色 + 点击高亮 + 阴影 | 同上 |
+| `assets/leaf-card-demo.html` | 6 个 POI 卡片 + 省指标卡 + Card/Tooltip/Float 三模式 | 同上 |
 
 ## 数据源
 
 - **中国行政区划**：阿里云 DataV.GeoAtlas `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
 - **全球数据**：OpenStreetMap Overpass API `https://overpass-api.de/api/interpreter`
 - **3D 建筑**：OSMBuildings `https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json`
+- **地图卡片**：`references/tooltip-card-guide.md`（Popup 卡式化、浮动卡片、CSS、模板）
