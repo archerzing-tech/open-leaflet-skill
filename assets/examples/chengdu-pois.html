@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成都景点标记</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+<style>
+html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+#map { width: 100%; height: 100%; min-height: 300px; }
+.leaflet-marker-icon:focus, .leaflet-marker-icon:focus-visible { outline: none !important; box-shadow: none !important; }
+.leaflet-tile { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.leaflet-tile-loaded { image-rendering: auto; }
+
+.leaflet-popup.card-popup .leaflet-popup-content-wrapper { padding: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+.leaflet-popup.card-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+.leaflet-popup.card-popup .leaflet-popup-tip { box-shadow: none; }
+.leaflet-popup.card-popup .leaflet-popup-close-button { top: 6px; right: 6px; color: #fff; opacity: .7; font-size: 18px; }
+
+.map-card { font-family: inherit; }
+.map-card-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+.map-card-body { padding: 14px 16px 16px; }
+.map-card-body h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.map-card-body .sub { margin: 0 0 8px; font-size: 12px; color: #888; }
+.map-card-body p { margin: 0 0 10px; font-size: 13px; color: #555; line-height: 1.5; }
+.tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 500; background: #eef2ff; color: #4338ca;
+}
+.tag.green { background: #ecfdf5; color: #059669; }
+.tag.orange { background: #fff7ed; color: #d97706; }
+.tag.purple { background: #f5f3ff; color: #7c3aed; }
+
+.attribution { position: absolute; bottom: 4px; right: 4px; z-index: 999; font-size: 10px; color: #999; background: rgba(255,255,255,.7); padding: 2px 6px; border-radius: 4px; }
+.attribution a { color: #666; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a></div>
+
+<script>
+var map = L.map('map', {
+  center: [30.68, 104.08], zoom: 13,
+  zoomControl: false, attributionControl: false,
+  fadeAnimation: true, zoomAnimation: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, keepBuffer: 8
+}).addTo(map);
+
+var pois = [
+  {
+    lat: 30.670, lng: 104.063, name: '天府广场', sub: '市中心地标',
+    desc: '成都市中心最大的广场，毛主席雕像坐落于此，周边汇聚四川科技馆、成都博物馆等。',
+    tags: [{label:'地标',cls:'orange'},{label:'免费',cls:'green'}],
+    img: 'https://picsum.photos/seed/cd-tianfu/400/200'
+  },
+  {
+    lat: 30.645, lng: 104.047, name: '锦里古街', sub: '三国文化街区',
+    desc: '武侯祠旁著名的仿古商业街，汇集四川小吃、手工艺品、茶馆，夜晚灯笼亮起时尤美。',
+    tags: [{label:'美食',cls:'green'},{label:'历史',cls:'purple'}],
+    img: 'https://picsum.photos/seed/cd-jinli/400/200'
+  },
+  {
+    lat: 30.735, lng: 104.145, name: '大熊猫基地', sub: '世界著名熊猫保护区',
+    desc: '全球最大的大熊猫人工繁育基地，可近距离观察大熊猫、小熊猫等珍稀动物。',
+    tags: [{label:'动物',cls:'green'},{label:'亲子',cls:'orange'}],
+    img: 'https://picsum.photos/seed/cd-panda/400/200'
+  },
+  {
+    lat: 30.685, lng: 104.087, name: '春熙路', sub: '成都时尚商业街',
+    desc: '成都最繁华的商业步行街，IFS、太古里等高端商场云集，也是网红打卡地。',
+    tags: [{label:'购物',cls:'purple'},{label:'美食',cls:'green'}],
+    img: 'https://picsum.photos/seed/cd-chunxi/400/200'
+  },
+  {
+    lat: 30.700, lng: 104.045, name: '宽窄巷子', sub: '清代古街巷',
+    desc: '由宽巷子、窄巷子、井巷子组成的老街区，保留清代川西民居风格，茶馆小吃琳琅满目。',
+    tags: [{label:'历史',cls:'purple'},{label:'美食',cls:'green'}],
+    img: 'https://picsum.photos/seed/cd-kuanzhai/400/200'
+  },
+  {
+    lat: 30.620, lng: 104.070, name: '九眼桥', sub: '夜景酒吧街',
+    desc: '成都著名夜景地标，安顺廊桥灯火辉煌，两岸酒吧林立，体验成都夜生活的好去处。',
+    tags: [{label:'夜生活',cls:'purple'},{label:'拍照',cls:'orange'}],
+    img: 'https://picsum.photos/seed/cd-jiuyan/400/200'
+  }
+];
+
+pois.forEach(function(p) {
+  var tagHtml = p.tags.map(function(t) {
+    return '<span class="tag ' + (t.cls || '') + '">' + t.label + '</span>';
+  }).join('');
+
+  var html = '<div class="map-card">' +
+    '<img class="map-card-img" src="' + p.img + '" alt="' + p.name + '" />' +
+    '<div class="map-card-body">' +
+      '<h3>' + p.name + '</h3>' +
+      '<div class="sub">' + p.sub + '</div>' +
+      '<p>' + p.desc + '</p>' +
+      '<div class="tags">' + tagHtml + '</div>' +
+    '</div>' +
+  '</div>';
+
+  L.marker([p.lat, p.lng])
+    .addTo(map)
+    .bindPopup(html, { className: 'card-popup', maxWidth: 320 });
+});
+
+if (window.ResizeObserver) {
+  new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
+}
+window.addEventListener('resize', function() { map.invalidateSize(); });
+</script>
+</body>
+</html>

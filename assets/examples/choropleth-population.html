@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国各省人口分级统计图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+<style>
+html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+#map { width: 100%; height: 100%; min-height: 300px; }
+.leaflet-marker-icon:focus, .leaflet-marker-icon:focus-visible { outline: none !important; box-shadow: none !important; }
+.leaflet-tile { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.leaflet-tile-loaded { image-rendering: auto; }
+
+.loading {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 999;
+  background: rgba(255,255,255,.95); border-radius: 12px; padding: 20px 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.1); font-size: 14px; color: #555;
+  transition: opacity .4s;
+}
+.loading.hidden { opacity: 0; pointer-events: none; }
+
+.info {
+  padding: 10px 14px; font: 13px/1.5 sans-serif;
+  background: rgba(255,255,255,.92); box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  border-radius: 8px;
+}
+.info h4 { margin: 0 0 6px; font-size: 14px; }
+.info i { width: 14px; height: 14px; display: inline-block; margin-right: 6px; border-radius: 2px; vertical-align: middle; }
+
+.legend {
+  position: absolute; bottom: 24px; left: 16px; z-index: 999;
+  background: rgba(255,255,255,.92); border-radius: 8px; padding: 10px 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.1); font-size: 12px; color: #555; line-height: 1.8;
+}
+.legend i { width: 14px; height: 14px; display: inline-block; margin-right: 6px; border-radius: 2px; vertical-align: middle; }
+
+.attribution { position: absolute; bottom: 4px; right: 4px; z-index: 999; font-size: 10px; color: #999; background: rgba(255,255,255,.7); padding: 2px 6px; border-radius: 4px; }
+.attribution a { color: #666; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="map">
+  <div class="loading" id="loading">Loading GeoJSON...</div>
+</div>
+<div class="legend">
+  <strong>人口（万人）</strong><br>
+  <i style="background:#800026"></i> &gt;8000<br>
+  <i style="background:#BD0026"></i> 5000-8000<br>
+  <i style="background:#E31A1C"></i> 3000-5000<br>
+  <i style="background:#FC4E2A"></i> 1000-3000<br>
+  <i style="background:#FD8D3C"></i> 500-1000<br>
+  <i style="background:#FEB24C"></i> 200-500<br>
+  <i style="background:#FFEDA0"></i> &lt;200
+</div>
+<div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · 人口数据为示例</div>
+
+<script>
+var map = L.map('map', {
+  center: [35, 108], zoom: 4,
+  zoomControl: false, attributionControl: false,
+  fadeAnimation: true, zoomAnimation: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, keepBuffer: 8
+}).addTo(map);
+
+var loading = document.getElementById('loading');
+
+function getColor(pop) {
+  return pop > 8000 ? '#800026' : pop > 5000 ? '#BD0026'
+       : pop > 3000 ? '#E31A1C' : pop > 1000 ? '#FC4E2A'
+       : pop > 500  ? '#FD8D3C' : pop > 200  ? '#FEB24C'
+       : '#FFEDA0';
+}
+
+function style(feature) {
+  var pop = feature.properties.population || 0;
+  return {
+    fillColor: getColor(pop),
+    weight: 1,
+    color: '#fff',
+    fillOpacity: 0.85
+  };
+}
+
+function highlightFeature(e) {
+  var layer = e.target;
+  layer.setStyle({ weight: 3, color: '#333', fillOpacity: 0.95 });
+  layer.bringToFront();
+  info.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+  geojson.resetStyle(e.target);
+  info.update();
+}
+
+var info = L.control({ position: 'topright' });
+info.onAdd = function() {
+  this._div = L.DomUtil.create('div', 'info');
+  this.update();
+  return this._div;
+};
+info.update = function(props) {
+  this._div.innerHTML = props
+    ? '<h4>' + props.name + '</h4>人口：' + (props.population || '?') + ' 万'
+    : 'Hover over a province';
+};
+
+var geojson;
+
+fetch('../../data/china_provinces.geojson')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loading.classList.add('hidden');
+
+    // Simulate population data if missing
+    data.features.forEach(function(f, i) {
+      if (!f.properties.population) {
+        f.properties.population = Math.round(Math.random() * 10000 + 100);
+      }
+    });
+
+    geojson = L.geoJSON(data, {
+      style: style,
+      onEachFeature: function(feature, layer) {
+        layer.on({ mouseover: highlightFeature, mouseout: resetHighlight });
+      }
+    }).addTo(map);
+    info.addTo(map);
+    map.fitBounds(geojson.getBounds().pad(0.05));
+  })
+  .catch(function() {
+    loading.textContent = 'Failed to load data';
+  });
+
+if (window.ResizeObserver) {
+  new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
+}
+window.addEventListener('resize', function() { map.invalidateSize(); });
+</script>
+</body>
+</html>

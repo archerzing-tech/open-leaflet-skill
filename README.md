@@ -52,153 +52,151 @@ leaflet/
 │   ├── taiwan.geojson            # 台湾省边界（独立文件）
 │   ├── hongkong.geojson          # 香港特别行政区边界（含 18 区）
 │   └── macau.geojson             # 澳门特别行政区边界（含 8 堂区）
-└── assets/
-    ├── leaf-demo.html            # 2D 演示：四川省高亮 + hover/click
-    ├── leaf-effects.html         # 特效演示：遮罩/脉动/发光/蚂蚁线/色调
-    ├── leaf-3d-demo.html         # 3D 演示：上海/北京/成都/深圳 + 高度着色
-    └── leaf-card-demo.html       # 地图卡片演示：6 POI + 指标卡 + 3 种模式切换
+├── assets/
+│   ├── leaf-demo.html            # 2D 演示：四川省高亮 + hover/click
+│   ├── leaf-effects.html         # 特效演示：遮罩/脉动/发光/蚂蚁线/色调
+│   ├── leaf-3d-demo.html         # 3D 演示：上海/北京/成都/深圳 + 高度着色
+│   ├── leaf-card-demo.html       # 地图卡片演示：6 POI + 指标卡 + 3 种模式切换
+│   └── examples/
+│       ├── sichuan-highlight.html     # 案例1：四川省高亮 + 信息卡片
+│       ├── chengdu-pois.html          # 案例2：成都景点图文卡片
+│       ├── choropleth-population.html # 案例3：全国人口分级统计图
+│       ├── screenshot-sichuan.png     # 案例1 截图
+│       ├── screenshot-chengdu.png     # 案例2 截图
+│       └── screenshot-choropleth.png  # 案例3 截图
 ```
 
-## 自然语言示例
+## 使用案例
 
-以下展示用户输入的自然语言描述，以及 Agent 生成的对应代码核心逻辑。
+以下展示用户输入的自然语言描述 → Agent 生成的 HTML 效果截图 → 核心代码。
 
-### 示例 1：省份高亮
+### 案例 1：省份高亮 + 数据指标卡片
 
-**用户说：** _"把四川省高亮显示，用红色边框"_
+**用户说：** _"把四川省高亮显示，用红色边框，点击弹出省会成都的数据指标卡片"_
 
-**Agent 生成的 HTML 核心代码：**
+**效果：**
 
-```javascript
-fetch('data/china_provinces.geojson')
-  .then(r => r.json())
-  .then(data => {
-    var province = data.features.find(f => f.properties.name === '四川省');
-    var layer = L.geoJSON(province, {
-      style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 }
-    }).addTo(map);
-    map.fitBounds(layer.getBounds());
-  });
-```
+![sichuan-highlight](assets/examples/screenshot-sichuan.png)
 
-**运行结果：** 地图自动缩放到四川省范围，红色边框 + 半透明红色填充，双击 `leaf-demo.html` 可查看。
-
-### 示例 2：景点标记
-
-**用户说：** _"在成都标出宽窄巷子、锦里、熊猫基地三个景点，点击弹窗显示名称"_
-
-**Agent 生成的 HTML 核心代码：**
+**核心代码：**
 
 ```javascript
-var markers = [
-  { name: '宽窄巷子', lat: 30.670, lng: 104.052 },
-  { name: '锦里',     lat: 30.645, lng: 104.047 },
-  { name: '熊猫基地', lat: 30.735, lng: 104.145 }
-];
-var markerLayers = [];
-markers.forEach(function(p) {
-  var m = L.marker([p.lat, p.lng]).addTo(map).bindPopup('<b>' + p.name + '</b>');
-  markerLayers.push(m);
-});
-map.fitBounds(L.featureGroup(markerLayers).getBounds().pad(0.2));
-```
-
-### 示例 3：3D 建筑场景
-
-**用户说：** _"显示上海陆家嘴的 3D 建筑地图，建筑高度用颜色区分"_
-
-**Agent 生成的 HTML 核心代码：**
-
-```javascript
-var map = L.map('map', { center: [31.241, 121.500], zoom: 16,
-  zoomControl: false, attributionControl: false });
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  { maxZoom: 19, keepBuffer: 8 }).addTo(map);
-
-var osmb = new OSMBuildings(map)
-  .load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
-osmb.style({ shadows: true });
-osmb.each(function(f) {
-  if (f.properties.height) {
-    var t = Math.min(f.properties.height / 150, 1);
-    f.properties.wallColor = 'rgb(' + Math.round(13 + 227 * t) + ','
-      + Math.round(148 - 60 * t) + ',' + Math.round(136 - 106 * t) + ')';
+var CACHE_KEY = 'sichuan_example';
+function loadCached(url) {
+  var cached = localStorage.getItem(CACHE_KEY);
+  if (cached && Date.now() - JSON.parse(cached).time < 86400000) {
+    return Promise.resolve(JSON.parse(cached).data);
   }
-});
-```
-
-**运行结果：** 陆家嘴 3D 建筑群，低矮建筑青绿色、高层建筑金黄色渐变，双击 `leaf-3d-demo.html` 选择上海可查看。
-
-### 示例 4：鼠标悬停高亮
-
-**用户说：** _"加载全国省份数据，鼠标划过省份时高亮，移出恢复"_
-
-**Agent 生成的 HTML 核心代码：**
-
-```javascript
-function highlightFeature(e) {
-  e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.7 }).bringToFront();
+  return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, time: Date.now() }));
+    return data;
+  });
 }
-function resetHighlight(e) { geojson.resetStyle(e.target); }
-geojson = L.geoJSON(data, {
-  style: { color: '#ff7800', weight: 2, fillOpacity: 0.3 },
+
+loadCached('data/china_provinces.geojson').then(function(data) {
+  var sichuan = data.features.find(function(f) { return f.properties.name === '四川省'; });
+  var layer = L.geoJSON(sichuan, {
+    style: { color: '#dc2626', weight: 3, fillColor: '#fef2f2', fillOpacity: 0.3 }
+  }).addTo(map);
+  map.fitBounds(layer.getBounds().pad(0.2));
+
+  layer.bindPopup(
+    '<div class="map-card"><div class="map-card-body">' +
+      '<h3>四川省</h3><div class="sub">中国西南 · 省会 成都市</div>' +
+      '<div class="metric-row"><span class="metric-label">面积</span><span class="metric-value gold">48.6万 km²</span></div>' +
+      '<div class="metric-row"><span class="metric-label">人口</span><span class="metric-value blue">8372万</span></div>' +
+      '<div class="metric-row"><span class="metric-label">GDP</span><span class="metric-value gold">5.9万亿元</span></div>' +
+    '</div></div>',
+    { className: 'card-popup', maxWidth: 260 }
+  );
+});
+```
+
+**完整文件：** `assets/examples/sichuan-highlight.html`
+
+---
+
+### 案例 2：成都景点标记 + 图文卡片
+
+**用户说：** _"在成都地图上标出宽窄巷子、锦里、熊猫基地、春熙路、九眼桥、天府广场六个景点，用自定义图标，点击显示带图片和标签的卡片"_
+
+**效果：**
+
+![chengdu-pois](assets/examples/screenshot-chengdu.png)
+
+**核心代码：**
+
+```javascript
+var pois = [
+  { lat: 30.670, lng: 104.063, name: '天府广场', sub: '市中心地标',
+    desc: '成都市中心最大的广场...', img: 'https://picsum.photos/seed/cd-tianfu/400/200',
+    tags: [{label:'地标',cls:'orange'},{label:'免费',cls:'green'}] },
+  { lat: 30.645, lng: 104.047, name: '锦里古街', sub: '三国文化街区', ... },
+  { lat: 30.735, lng: 104.145, name: '大熊猫基地', sub: '世界著名熊猫保护区', ... },
+  { lat: 30.685, lng: 104.087, name: '春熙路', sub: '成都时尚商业街', ... },
+  { lat: 30.700, lng: 104.045, name: '宽窄巷子', sub: '清代古街巷', ... },
+  { lat: 30.620, lng: 104.070, name: '九眼桥', sub: '夜景酒吧街', ... }
+];
+
+pois.forEach(function(p) {
+  var tagHtml = p.tags.map(function(t) {
+    return '<span class="tag ' + (t.cls || '') + '">' + t.label + '</span>';
+  }).join('');
+  var html = '<div class="map-card">' +
+    '<img class="map-card-img" src="' + p.img + '" />' +
+    '<div class="map-card-body"><h3>' + p.name + '</h3>' +
+    '<div class="sub">' + p.sub + '</div><p>' + p.desc + '</p>' +
+    '<div class="tags">' + tagHtml + '</div></div></div>';
+  L.marker([p.lat, p.lng])
+    .addTo(map)
+    .bindPopup(html, { className: 'card-popup', maxWidth: 320 });
+});
+```
+
+**完整文件：** `assets/examples/chengdu-pois.html`
+
+---
+
+### 案例 3：全国人口分级统计图
+
+**用户说：** _"用颜色表示各省人口密度，颜色越深人口越多，鼠标划过时显示省份名称和人口数量"_
+
+**效果：**
+
+![choropleth](assets/examples/screenshot-choropleth.png)
+
+**核心代码：**
+
+```javascript
+function getColor(pop) {
+  return pop > 8000 ? '#800026' : pop > 5000 ? '#BD0026'
+       : pop > 3000 ? '#E31A1C' : pop > 1000 ? '#FC4E2A'
+       : pop > 500  ? '#FD8D3C' : pop > 200  ? '#FEB24C'
+       : '#FFEDA0';
+}
+
+function style(feature) {
+  return { fillColor: getColor(feature.properties.population || 0),
+           weight: 1, color: '#fff', fillOpacity: 0.85 };
+}
+
+var geojson = L.geoJSON(data, {
+  style: style,
   onEachFeature: function(feature, layer) {
-    layer.on({ mouseover: highlightFeature, mouseout: resetHighlight });
+    layer.on({
+      mouseover: function(e) {
+        e.target.setStyle({ weight: 3, color: '#333', fillOpacity: 0.95 });
+        info.update(feature.properties);
+      },
+      mouseout: function(e) { geojson.resetStyle(e.target); info.update(); }
+    });
   }
 }).addTo(map);
 ```
 
-### 示例 5：分级统计图（Choropleth）
+**完整文件：** `assets/examples/choropleth-population.html`
 
-**用户说：** _"做一个全国省份人口分级统计图，人口越多的省颜色越深"_
-
-**Agent 生成的 HTML 核心代码：**
-
-```javascript
-fetch('data/china_provinces.geojson')
-  .then(r => r.json())
-  .then(data => {
-    function getColor(pop) {
-      return pop > 8000 ? '#800026' : pop > 5000 ? '#BD0026'
-           : pop > 3000 ? '#E31A1C' : pop > 1000 ? '#FC4E2A'
-           : pop > 500  ? '#FD8D3C' : pop > 200  ? '#FEB24C'
-           : '#FFEDA0';
-    }
-    L.geoJSON(data, {
-      style: function(f) {
-        return { fillColor: getColor(f.properties.population || 0),
-                 weight: 1, color: '#fff', fillOpacity: 0.8 };
-      }
-    }).addTo(map);
-  });
-```
-
-### 示例 6：地图特效
-
-**用户说：** _"显示北京城区地图，加一个脉动标记在天安门位置，周围加发光圆圈"_
-
-**Agent 生成的 HTML 核心代码：**
-
-```javascript
-// 脉动标记
-var pulseIcon = L.divIcon({
-  className: 'pulse-dot',
-  html: '<div style="width:16px;height:16px;background:#ff4444;border-radius:50%;box-shadow:0 0 8px #ff4444;"></div>',
-  iconSize: [16, 16]
-});
-L.marker([39.9042, 116.3974], { icon: pulseIcon }).addTo(map);
-
-// 发光圆圈
-L.circle([39.9042, 116.3974], {
-  radius: 500, color: '#ff4444', fillColor: '#ff4444', fillOpacity: 0.1, weight: 2
-}).addTo(map);
-
-// CSS 脉动动画
-// @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
-// .pulse-dot { animation: pulse 1.5s ease-in-out infinite; }
-```
-
-更多特效（遮罩、蚂蚁线、颜色变换等）见 `assets/leaf-effects.html`。
+---
 
 ## Demo
 
@@ -208,6 +206,9 @@ L.circle([39.9042, 116.3974], {
 | `assets/leaf-effects.html` | 遮罩、脉动、发光、蚂蚁线、色调变换 | 同上 |
 | `assets/leaf-3d-demo.html` | 4 城市 3D 建筑 + 高度着色 + 点击高亮 + 阴影 | 同上 |
 | `assets/leaf-card-demo.html` | 6 个 POI 卡片 + 省指标卡 + Card/Tooltip/Float 三模式 | 同上 |
+| `assets/examples/sichuan-highlight.html` | 四川省高亮 + 成都数据指标卡片 | 同上 |
+| `assets/examples/chengdu-pois.html` | 成都 6 景点图文卡片标记 | 同上 |
+| `assets/examples/choropleth-population.html` | 全国人口分级统计 + hover 交互 | 同上 |
 
 ## 数据源
 

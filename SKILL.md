@@ -511,6 +511,9 @@ marker.on('mouseout', hideCard);
 | `assets/leaf-effects.html` | 特效演示 HTML（遮罩、脉动、发光、蚂蚁线等） |
 | `assets/leaf-3d-demo.html` | 3D 建筑演示 HTML（4 城市预设 + 高度着色 + 点击高亮） |
 | `assets/leaf-card-demo.html` | 地图卡片演示 HTML（6 POI 卡片 + 指标卡 + 3 种模式切换） |
+| `assets/examples/sichuan-highlight.html` | 使用案例：四川省高亮 + 成都指标卡片 |
+| `assets/examples/chengdu-pois.html` | 使用案例：成都 6 景点图文卡片标记 |
+| `assets/examples/choropleth-population.html` | 使用案例：全国人口分级统计 + hover 交互 |
 
 ## 常见用例模板
 

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四川省高亮 + 成都信息卡片</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+<style>
+html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+#map { width: 100%; height: 100%; min-height: 300px; }
+.leaflet-marker-icon:focus, .leaflet-marker-icon:focus-visible { outline: none !important; box-shadow: none !important; }
+.leaflet-tile { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.leaflet-tile-loaded { image-rendering: auto; }
+
+.leaflet-popup.card-popup .leaflet-popup-content-wrapper { padding: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+.leaflet-popup.card-popup .leaflet-popup-content { margin: 0; width: auto !important; }
+.leaflet-popup.card-popup .leaflet-popup-tip { box-shadow: none; }
+
+.map-card { font-family: inherit; }
+.map-card-body { padding: 16px 18px 18px; }
+.map-card-body h3 { margin: 0 0 2px; font-size: 17px; font-weight: 600; }
+.map-card-body .sub { margin: 0 0 10px; font-size: 12px; color: #888; }
+.metric-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.metric-row:last-child { border-bottom: 0; }
+.metric-label { color: #666; }
+.metric-value { font-weight: 600; }
+.metric-value.gold { color: #d97706; }
+.metric-value.green { color: #059669; }
+.metric-value.blue { color: #2563eb; }
+
+.loading {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 999;
+  background: rgba(255,255,255,.95); border-radius: 12px; padding: 20px 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.1); font-size: 14px; color: #555;
+  transition: opacity .4s;
+}
+.loading.hidden { opacity: 0; pointer-events: none; }
+
+.attribution { position: absolute; bottom: 4px; right: 4px; z-index: 999; font-size: 10px; color: #999; background: rgba(255,255,255,.7); padding: 2px 6px; border-radius: 4px; }
+.attribution a { color: #666; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="map">
+  <div class="loading" id="loading">Loading GeoJSON...</div>
+</div>
+<div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a></div>
+
+<script>
+var map = L.map('map', {
+  center: [30.5, 103], zoom: 6,
+  zoomControl: false, attributionControl: false,
+  fadeAnimation: true, zoomAnimation: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, keepBuffer: 8, updateWhenZooming: false, updateInterval: 100
+}).addTo(map);
+
+var loading = document.getElementById('loading');
+var CACHE_KEY = 'sichuan_example';
+
+function loadCached(url) {
+  var cached = localStorage.getItem(CACHE_KEY);
+  if (cached && Date.now() - JSON.parse(cached).time < 86400000) {
+    return Promise.resolve(JSON.parse(cached).data);
+  }
+  return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, time: Date.now() }));
+    return data;
+  });
+}
+
+loadCached('../../data/china_provinces.geojson').then(function(data) {
+  loading.classList.add('hidden');
+  var sichuan = data.features.find(function(f) { return f.properties.name === '四川省'; });
+  if (!sichuan) return;
+
+  var layer = L.geoJSON(sichuan, {
+    style: { color: '#dc2626', weight: 3, fillColor: '#fef2f2', fillOpacity: 0.3 }
+  }).addTo(map);
+  map.fitBounds(layer.getBounds().pad(0.2));
+
+  layer.bindPopup(
+    '<div class="map-card"><div class="map-card-body">' +
+      '<h3>四川省</h3>' +
+      '<div class="sub">中国西南地区 · 省会 成都市</div>' +
+      '<div class="metric-row"><span class="metric-label">面积</span><span class="metric-value gold">48.6万 km²</span></div>' +
+      '<div class="metric-row"><span class="metric-label">人口</span><span class="metric-value blue">8372万</span></div>' +
+      '<div class="metric-row"><span class="metric-label">GDP</span><span class="metric-value gold">5.9万亿元</span></div>' +
+      '<div class="metric-row"><span class="metric-label">省会</span><span class="metric-value green">成都市</span></div>' +
+    '</div></div>',
+    { className: 'card-popup', maxWidth: 260 }
+  );
+}).catch(function() {
+  loading.textContent = 'Failed to load data';
+});
+
+if (window.ResizeObserver) {
+  new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
+}
+window.addEventListener('resize', function() { map.invalidateSize(); });
+</script>
+</body>
+</html>
