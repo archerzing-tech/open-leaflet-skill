@@ -400,6 +400,7 @@ fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query
 ## 常见用例模板
 
 ### 用例 1：定位到省份并高亮
+**用户说：** "把四川省高亮显示，用红色边框"
 ```javascript
 fetch('data/china_provinces.geojson')
   .then(r => r.json())
@@ -412,16 +413,21 @@ fetch('data/china_provinces.geojson')
   });
 ```
 
-### 用例 2：多个标记点
+### 用例 2：景点标记
+**用户说：** "在成都标出宽窄巷子、锦里、熊猫基地三个景点，点击弹窗显示名称"
 ```javascript
-var points = [{name: '点1', lat: 30.5, lng: 104.0}, ...];
-points.forEach(p => {
-  L.marker([p.lat, p.lng]).addTo(map).bindPopup(p.name);
+var markers = [
+  { name: '宽窄巷子', lat: 30.670, lng: 104.052 },
+  { name: '锦里',     lat: 30.645, lng: 104.047 },
+  { name: '熊猫基地', lat: 30.735, lng: 104.145 }
+];
+markers.forEach(function(p) {
+  L.marker([p.lat, p.lng]).addTo(map).bindPopup('<b>' + p.name + '</b>');
 });
 ```
 
 ### 用例 3：鼠标悬停高亮
-
+**用户说：** "加载全国省份数据，鼠标划过省份时高亮，移出恢复"
 ```javascript
 function highlightFeature(e) {
   var layer = e.target;
@@ -438,9 +444,8 @@ geojson = L.geoJSON(data, {
 ```
 
 ### 用例 4：3D 建筑场景（指定城市）
-
+**用户说：** "显示上海的 3D 建筑地图，建筑高度用颜色区分"
 ```javascript
-// 用户说："显示上海的 3D 建筑地图"
 var map = L.map('map', { center: [31.241, 121.500], zoom: 16, zoomControl: false, attributionControl: false });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, keepBuffer: 8 }).addTo(map);
 new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
@@ -460,3 +465,39 @@ osmb.click(function(f) {
   });
   osmb.set(osmb._data);
 });
+```
+
+### 用例 5：分级统计图（Choropleth）
+**用户说：** "做一个全国省份人口分级统计图，人口越多的省颜色越深"
+```javascript
+fetch('data/china_provinces.geojson')
+  .then(r => r.json())
+  .then(data => {
+    function getColor(pop) {
+      return pop > 8000 ? '#800026' : pop > 5000 ? '#BD0026'
+           : pop > 3000 ? '#E31A1C' : pop > 1000 ? '#FC4E2A'
+           : pop > 500  ? '#FD8D3C' : pop > 200  ? '#FEB24C'
+           : '#FFEDA0';
+    }
+    L.geoJSON(data, {
+      style: function(f) {
+        return { fillColor: getColor(f.properties.population || 0),
+                 weight: 1, color: '#fff', fillOpacity: 0.8 };
+      }
+    }).addTo(map);
+  });
+```
+
+### 用例 6：地图特效
+**用户说：** "显示北京城区地图，加一个脉动标记在天安门位置，周围加发光圆圈"
+```javascript
+var pulseIcon = L.divIcon({
+  className: 'pulse-dot',
+  html: '<div style="width:16px;height:16px;background:#ff4444;border-radius:50%;box-shadow:0 0 8px #ff4444;"></div>',
+  iconSize: [16, 16]
+});
+L.marker([39.9042, 116.3974], { icon: pulseIcon }).addTo(map);
+L.circle([39.9042, 116.3974], {
+  radius: 500, color: '#ff4444', fillColor: '#ff4444', fillOpacity: 0.1, weight: 2
+}).addTo(map);
+```
