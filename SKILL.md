@@ -20,6 +20,21 @@ metadata:
 
 ## 地图缓存与显示优化（所有生成的文件必须包含）
 
+### Marker 点击边框去除
+
+点击地图标记时，浏览器默认出现矩形 focus 轮廓线，必须通过 CSS 去除：
+
+```css
+/* 去除 marker 点击/聚焦时的矩形边框 */
+.leaflet-marker-icon:focus,
+.leaflet-marker-icon:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+```
+
+所有含 marker 的生成文件必须包含此样式。
+
 ### 瓦片缓存与平滑渲染
 
 ```javascript
