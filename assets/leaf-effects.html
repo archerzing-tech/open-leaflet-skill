@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaflet 地图特效演示</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  #map { width: 100%; height: 100%; min-height: 300px; }
+
+  .leaflet-tile { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+  .leaflet-tile-loaded { image-rendering: auto; }
+
+  /* ===== 脉动标记 ===== */
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(233,69,96,0.7); }
+    50% { box-shadow: 0 0 0 16px rgba(233,69,96,0); }
+    100% { box-shadow: 0 0 0 0 rgba(233,69,96,0); }
+  }
+  .pulse-dot {
+    width: 16px; height: 16px; background: #e94560; border-radius: 50%;
+    border: 2.5px solid #fff;
+    animation: pulse 1.5s ease-in-out infinite, pulse-ring 1.5s ease-in-out infinite;
+  }
+
+  /* ===== 呼吸多边形 ===== */
+  @keyframes breathe {
+    0%, 100% { fill-opacity: 0.25; stroke-opacity: 0.8; }
+    50% { fill-opacity: 0.55; stroke-opacity: 1; }
+  }
+  .breathe { animation: breathe 2.5s ease-in-out infinite; filter: url(#glow); }
+
+  /* ===== 描边脉冲 ===== */
+  @keyframes dash-march { to { stroke-dashoffset: -24; } }
+  .marching-ants { stroke-dasharray: 12 6; animation: dash-march 0.6s linear infinite; }
+
+  /* ===== 颜色渐变 ===== */
+  @keyframes color-shift {
+    0% { fill: #e94560; } 33% { fill: #0f3460; }
+    66% { fill: #533483; } 100% { fill: #e94560; }
+  }
+  .color-shift { animation: color-shift 4s ease-in-out infinite; }
+
+  /* ===== 弹跳标记 ===== */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bounce-marker { animation: bounce 1s ease-in-out infinite; }
+
+  .control-panel {
+    position: absolute; top: 16px; left: 16px; z-index: 1000;
+    background: rgba(255,255,255,0.95); border-radius: 10px;
+    padding: 14px 18px; box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+    min-width: 160px; font-size: 13px;
+  }
+  .control-panel h3 { margin: 0 0 8px; font-size: 14px; color: #333; }
+  .control-panel label { display: block; margin: 6px 0; cursor: pointer; }
+  .control-panel input { margin-right: 6px; vertical-align: middle; }
+  .control-panel select { width: 100%; margin-top: 6px; padding: 4px; }
+</style>
+</head>
+<body>
+
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <linearGradient id="warm-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b35"/>
+      <stop offset="100%" stop-color="#f7c59f"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div id="map"></div>
+
+<div class="control-panel">
+  <h3>🎛 特效控制</h3>
+  <label><input type="checkbox" id="chkPulse" checked> 脉动标记</label>
+  <label><input type="checkbox" id="chkBreathe" checked> 呼吸光晕</label>
+  <label><input type="checkbox" id="chkMarch" checked> 蚂蚁线</label>
+  <label><input type="checkbox" id="chkGlow" checked> 外发光</label>
+  <label><input type="checkbox" id="chkMask" checked> 遮罩压暗</label>
+  <label>
+    色调
+    <select id="selFilter">
+      <option value="">无</option>
+      <option value="grayscale(1)">灰度</option>
+      <option value="sepia(0.5) hue-rotate(-10deg)">暖色</option>
+      <option value="hue-rotate(150deg) saturate(0.7)">冷色</option>
+      <option value="brightness(0.6) contrast(1.2) hue-rotate(180deg)">夜间</option>
+    </select>
+  </label>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map('map', {
+  center: [32, 106], zoom: 4.5,
+  zoomControl: false, attributionControl: false,
+  fadeAnimation: true, zoomAnimation: true, zoomAnimationThreshold: 4
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, keepBuffer: 8, updateWhenZooming: false
+}).addTo(map);
+
+// ===== 数据：四川省 =====
+var targetLayer;
+var maskLayer;
+
+fetch('https://geo.datav.aliyun.com/areas_v3/bound/510000_full.json')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    targetLayer = L.geoJSON(data, {
+      style: { color: '#e94560', weight: 2, fillColor: '#e94560', fillOpacity: 0.25, className: 'breathe' },
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup('<b>四川省</b><br>发光 · 脉动 · 呼吸');
+      }
+    }).addTo(map);
+
+    // 蚂蚁线（虚线描边）
+    var marchLayer = L.geoJSON(data, {
+      style: { color: '#ffe066', weight: 4, dashArray: '12 6', opacity: 0.9,
+               fill: false, className: 'marching-ants' }
+    }).addTo(map);
+
+    // 四川省会脉动标记
+    L.marker([30.5728, 104.0665], {
+      icon: L.divIcon({ className: '', html: '<div class="pulse-dot"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })
+    }).addTo(map).bindPopup('<b>成都市</b><br>脉动标记 · 省会');
+
+    // 额外脉动标记（省内主要城市）
+    var cities = [
+      { name: '绵阳市', lat: 31.4676, lng: 104.6796 },
+      { name: '宜宾市', lat: 28.7513, lng: 104.6418 },
+      { name: '南充市', lat: 30.8373, lng: 106.1107 },
+      { name: '泸州市', lat: 28.8717, lng: 105.4423 }
+    ];
+    cities.forEach(function(c) {
+      L.marker([c.lat, c.lng], {
+        icon: L.divIcon({ className: '', html: '<div class="pulse-dot" style="width:10px;height:10px"></div>', iconSize: [10, 10], iconAnchor: [5, 5] })
+      }).addTo(map).bindPopup('<b>' + c.name + '</b>');
+    });
+
+    // 遮罩
+    createMask(targetLayer);
+
+    // 缩放到四川
+    map.fitBounds(targetLayer.getBounds().pad(0.05));
+
+    // 初始化控件同步
+    setupControls();
+  });
+
+// ===== 遮罩 =====
+function createMask(targetLayer) {
+  if (maskLayer) map.removeLayer(maskLayer);
+  var b = targetLayer.getBounds().pad(0.3);
+  var world = [[-90, -180], [-90, 180], [90, 180], [90, -180]];
+  var hole = [[b.getSouth(), b.getWest()], [b.getNorth(), b.getWest()], [b.getNorth(), b.getEast()], [b.getSouth(), b.getEast()]];
+  maskLayer = L.polygon([world, hole], {
+    color: 'transparent', fillColor: '#000', fillOpacity: 0.5,
+    weight: 0, interactive: false, pane: 'overlayPane'
+  }).addTo(map);
+}
+
+// ===== 控件绑定 =====
+function setupControls() {
+  document.getElementById('chkPulse').addEventListener('change', function() {
+    document.querySelectorAll('.pulse-dot').forEach(function(el) {
+      el.style.animationPlayState = this.checked ? 'running' : 'paused';
+    }, this);
+  });
+
+  document.getElementById('chkBreathe').addEventListener('change', function() {
+    document.querySelectorAll('.breathe').forEach(function(el) {
+      el.style.animationPlayState = this.checked ? 'running' : 'paused';
+    }, this);
+  });
+
+  document.getElementById('chkMarch').addEventListener('change', function() {
+    document.querySelectorAll('.marching-ants').forEach(function(el) {
+      el.style.animationPlayState = this.checked ? 'running' : 'paused';
+    }, this);
+  });
+
+  document.getElementById('chkGlow').addEventListener('change', function() {
+    document.querySelectorAll('.breathe').forEach(function(el) {
+      el.style.filter = this.checked ? 'url(#glow)' : 'none';
+    }, this);
+  });
+
+  document.getElementById('chkMask').addEventListener('change', function() {
+    if (maskLayer) {
+      if (this.checked) { maskLayer.addTo(map); }
+      else { map.removeLayer(maskLayer); }
+    }
+  });
+
+  document.getElementById('selFilter').addEventListener('change', function() {
+    var container = document.querySelector('.leaflet-tile-pane');
+    if (container) container.style.filter = this.value;
+  });
+}
+
+// ===== 自适应 =====
+var ro = new ResizeObserver(function() { map.invalidateSize(); });
+ro.observe(document.getElementById('map'));
+window.addEventListener('resize', function() { map.invalidateSize(); });
+if (window !== window.top) {
+  window.addEventListener('message', function(e) {
+    if (e.data === 'resize') map.invalidateSize();
+  });
+}
+</script>
+</body>
+</html>

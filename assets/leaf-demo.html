@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaflet 地图演示 - 四川省高亮</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  #map { width: 100%; height: 100%; min-height: 300px; }
+  /* 瓦片渲染优化：平滑缩放 */
+  .leaflet-tile { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+  .leaflet-tile-loaded { image-rendering: auto; }
+  .info {
+    padding: 8px 12px;
+    font: 14px/18px sans-serif;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    border-left: 4px solid #ff4444;
+  }
+  .info h4 { margin: 0 0 4px; color: #333; }
+  .info p { margin: 0; color: #666; font-size: 12px; }
+  .legend {
+    padding: 8px 12px;
+    font: 13px/18px sans-serif;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    border-radius: 6px;
+  }
+  .legend i {
+    width: 16px; height: 16px;
+    float: left; margin-right: 6px;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== 1. 初始化地图（动画与缓存优化） =====
+var map = L.map('map', {
+  center: [30.5, 102.0],
+  zoom: 6,
+  zoomControl: false,
+  attributionControl: false,
+  fadeAnimation: true,
+  zoomAnimation: true,
+  markerZoomAnimation: true,
+  zoomAnimationThreshold: 4
+});
+
+// ===== 2. 缓存底图瓦片 =====
+var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  keepBuffer: 8,
+  updateWhenZooming: false,
+  updateInterval: 100
+}).addTo(map);
+
+// 预加载当前视图周边瓦片（平滑拖动）
+tileLayer.on('load', function() {
+  document.querySelectorAll('.leaflet-tile-loaded').forEach(function(t) {
+    t.style.imageRendering = 'auto';
+  });
+});
+
+// ===== 3. GeoJSON 缓存：localStorage 避免重复加载 =====
+var CACHE_KEY = 'leaf_demo_china_geo';
+function loadGeoJSON() {
+  var cached = localStorage.getItem(CACHE_KEY);
+  if (cached && Date.now() - JSON.parse(cached).time < 86400000) {
+    return Promise.resolve(JSON.parse(cached).data);
+  }
+  return fetch('../data/china_provinces.geojson')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, time: Date.now() }));
+      return data;
+    });
+}
+
+// ===== 4. 信息控件 =====
+var info = L.control({ position: 'topright' });
+info.onAdd = function() {
+  this._div = L.DomUtil.create('div', 'info');
+  this._div.innerHTML = '<h4>四川省</h4><p>面积: 48.6万 km² | 人口: 8367万</p><p>省会: 成都 | 简称: 川/蜀</p>';
+  return this._div;
+};
+info.addTo(map);
+
+// ===== 5. 加载中国省级数据并高亮四川省 =====
+loadGeoJSON()
+  .then(function(r) { return r.json(); })
+  .then(function(chinaData) {
+    // 筛选出四川省
+    var sichuanData = chinaData.features.filter(function(f) {
+      return f.properties.name === '四川省';
+    });
+
+    // 四川省高亮图层
+    var sichuanLayer = L.geoJSON(sichuanData, {
+      style: {
+        color: '#ff4444',
+        weight: 3,
+        opacity: 1,
+        fillColor: '#ff4444',
+        fillOpacity: 0.15
+      },
+      onEachFeature: function(feature, layer) {
+        layer.bindPopup(
+          '<b>' + feature.properties.name + '</b><br>' +
+          'adcode: ' + feature.properties.adcode + '<br>' +
+          '中心: ' + feature.properties.center.join(', ')
+        );
+        layer.on({
+          mouseover: function(e) {
+            e.target.setStyle({
+              weight: 5,
+              fillOpacity: 0.3
+            });
+            e.target.bringToFront();
+          },
+          mouseout: function(e) {
+            sichuanLayer.resetStyle(e.target);
+          }
+        });
+      }
+    }).addTo(map);
+
+    // 缩放到四川省范围
+    map.fitBounds(sichuanLayer.getBounds().pad(0.05));
+
+    // 添加其他省份灰色轮廓作为底衬（仅显示轮廓）
+    var otherProvinces = chinaData.features.filter(function(f) {
+      return f.properties.name !== '四川省';
+    });
+    L.geoJSON(otherProvinces, {
+      style: {
+        color: '#ccc',
+        weight: 1,
+        opacity: 0.6,
+        fill: false
+      },
+      onEachFeature: function(feature, layer) {
+        layer.on({
+          click: function(e) {
+            map.fitBounds(e.target.getBounds().pad(0.1));
+          }
+        });
+      }
+    }).addTo(map);
+  })
+  .catch(function(err) {
+    console.error('加载 GeoJSON 失败:', err);
+    // 回退：如果没有本地数据，尝试从 DataV API 加载
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/510000_full.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var layer = L.geoJSON(data, {
+          style: { color: '#ff4444', weight: 3, fillColor: '#ff4444', fillOpacity: 0.15 }
+        }).addTo(map);
+        map.fitBounds(layer.getBounds().pad(0.1));
+      });
+  });
+
+// ===== 6. 图例 =====
+var legend = L.control({ position: 'bottomright' });
+legend.onAdd = function() {
+  var div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = '<i style="background:#ff4444"></i> 四川省<br>' +
+                  '<i style="background:#ccc;opacity:0.6"></i> 其他省份';
+  return div;
+};
+legend.addTo(map);
+
+// ===== 7. 点击地图获取坐标 =====
+var clickPopup = L.popup();
+map.on('click', function(e) {
+  clickPopup
+    .setLatLng(e.latlng)
+    .setContent('纬度: ' + e.latlng.lat.toFixed(4) + '<br>经度: ' + e.latlng.lng.toFixed(4))
+    .openOn(map);
+});
+
+// ===== 8. 自适应容器 =====
+var ro = new ResizeObserver(function() { map.invalidateSize(); });
+ro.observe(document.getElementById('map'));
+window.addEventListener('resize', function() { map.invalidateSize(); });
+
+// iframe 场景：父窗口尺寸变化时通知
+if (window !== window.top) {
+  window.addEventListener('message', function(e) {
+    if (e.data === 'resize') map.invalidateSize();
+  });
+}
+
+console.log('Leaflet 地图已加载。四川省以红色高亮显示。');
+</script>
+</body>
+</html>
