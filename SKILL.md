@@ -487,6 +487,7 @@ marker.on('mouseout', hideCard);
 | `references/effects-guide.md` | 地图特效指南（遮罩、发光、脉动、颜色变换）|
 | `references/3d-buildings-guide.md` | 3D 建筑场景指南（OSM Buildings API + Overpass 查询） |
 | `references/tooltip-card-guide.md` | 地图卡片 / Tooltip 指南（Popup 卡式化、浮动卡片、模板、约束） |
+| `references/real-world-examples.md` | 真实 Leaflet 案例参考（实时追踪、热力图、聚类、搜索定位、React 集成） |
 | `data/china_provinces.geojson` | 中国省级行政区划 GeoJSON 数据（含港澳台，~1MB） |
 | `data/taiwan.geojson` | 台湾省边界 GeoJSON |
 | `data/hongkong.geojson` | 香港特别行政区边界 GeoJSON（含 18 区） |

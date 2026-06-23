@@ -45,7 +45,8 @@ leaflet/
 │   ├── data-sources.md           # 地理数据源（DataV, OSM, Overpass）
 │   ├── effects-guide.md          # 地图特效指南
 │   ├── 3d-buildings-guide.md     # OSMBuildings 3D 建筑指南
-│   └── tooltip-card-guide.md    # 地图卡片 / Tooltip 指南
+│   ├── tooltip-card-guide.md    # 地图卡片 / Tooltip 指南
+│   └── real-world-examples.md   # 真实 Leaflet 案例参考（实时追踪、热力图、聚类等）
 ├── data/
 │   ├── china_provinces.geojson   # 中国省级边界数据（34 省份 + 港澳台）
 │   ├── taiwan.geojson            # 台湾省边界（独立文件）
@@ -214,3 +215,4 @@ L.circle([39.9042, 116.3974], {
 - **全球数据**：OpenStreetMap Overpass API `https://overpass-api.de/api/interpreter`
 - **3D 建筑**：OSMBuildings `https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json`
 - **地图卡片**：`references/tooltip-card-guide.md`（Popup 卡式化、浮动卡片、CSS、模板）
+- **真实案例**：`references/real-world-examples.md`（实时追踪、热力图、MarkerCluster、搜索定位等）
