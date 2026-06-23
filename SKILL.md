@@ -12,7 +12,7 @@ metadata:
 
 ## 核心原则
 
-1. **从本地 GeoJSON 数据查找地理信息**：`data/china_provinces.geojson` 包含中国所有省级行政区划数据，优先使用它
+1. **从本地 GeoJSON 数据查找地理信息**：`data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `data/taiwan.geojson`、`data/hongkong.geojson`、`data/macau.geojson` 按需加载
 2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用 CDN 加载 Leaflet）
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
@@ -205,7 +205,8 @@ L.geoJSON(data, {
 按优先级从高到低使用以下数据源：
 
 #### 中国省级数据
-- **首选**：本地 `data/china_provinces.geojson`（按 `properties.name` 匹配省名）
+- **首选**：本地 `data/china_provinces.geojson`（按 `properties.name` 匹配省名，含港澳台）
+- **独立港澳台文件**：`data/taiwan.geojson`、`data/hongkong.geojson`、`data/macau.geojson`（香港 18 区 / 澳门 8 堂区）
 - **最佳在线源**：`阿里云 DataV.GeoAtlas` → `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
   - 全国：`https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json`
   - 四川：`https://geo.datav.aliyun.com/areas_v3/bound/510000_full.json`
@@ -392,7 +393,10 @@ fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query
 | `references/data-sources.md` | 地理数据源参考（DataV、OSM、Overpass API）|
 | `references/effects-guide.md` | 地图特效指南（遮罩、发光、脉动、颜色变换）|
 | `references/3d-buildings-guide.md` | 3D 建筑场景指南（OSM Buildings API + Overpass 查询） |
-| `data/china_provinces.geojson` | 中国省级行政区划 GeoJSON 数据（~1MB） |
+| `data/china_provinces.geojson` | 中国省级行政区划 GeoJSON 数据（含港澳台，~1MB） |
+| `data/taiwan.geojson` | 台湾省边界 GeoJSON |
+| `data/hongkong.geojson` | 香港特别行政区边界 GeoJSON（含 18 区） |
+| `data/macau.geojson` | 澳门特别行政区边界 GeoJSON（含 8 堂区） |
 | `assets/leaf-demo.html` | 默认演示 HTML（四川省高亮） |
 | `assets/leaf-effects.html` | 特效演示 HTML（遮罩、脉动、发光、蚂蚁线等） |
 | `assets/leaf-3d-demo.html` | 3D 建筑演示 HTML（4 城市预设 + 高度着色 + 点击高亮） |

@@ -46,7 +46,10 @@ leaflet/
 │   ├── effects-guide.md          # 地图特效指南
 │   └── 3d-buildings-guide.md     # OSMBuildings 3D 建筑指南
 ├── data/
-│   └── china_provinces.geojson   # 中国省级边界数据（34 省份）
+│   ├── china_provinces.geojson   # 中国省级边界数据（34 省份 + 港澳台）
+│   ├── taiwan.geojson            # 台湾省边界（独立文件）
+│   ├── hongkong.geojson          # 香港特别行政区边界（含 18 区）
+│   └── macau.geojson             # 澳门特别行政区边界（含 8 堂区）
 └── assets/
     ├── leaf-demo.html            # 2D 演示：四川省高亮 + hover/click
     ├── leaf-effects.html         # 特效演示：遮罩/脉动/发光/蚂蚁线/色调
