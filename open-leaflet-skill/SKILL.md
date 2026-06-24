@@ -112,6 +112,7 @@ fetch(url).then(r => r.json()).then(data => {
   - 文件生成在 `assets/` 目录内：使用 `./lib/leaflet.js` 和 `./lib/leaflet.css`（与模板一致）
   - 文件生成在其他目录：使用相对于该目录的路径指向 `open-leaflet-skill/assets/lib/leaflet.js`，或将 `assets/lib/` 目录复制到输出目录同级后使用 `./lib/leaflet.js`
 - ⚠️ **常见错误**：不要用 `assets/lib/leaflet.js` 或 `open-leaflet-skill/assets/lib/leaflet.js` 作为 HTML 内部引用路径——HTML 中的路径必须是相对于 HTML 文件自身的位置。路径写错会导致 `L is not defined` 错误。
+- ⚠️ **`file://` 协议限制**：部分浏览器在 `file://` 协议下会因安全策略阻止跨域请求。如遇到 `'file:' URLs are treated as unique security origins` 错误，请通过本地 HTTP 服务器打开（如 `python3 -m http.server`）。生成 HTML 时确保 `<script src="..."></script>` 标签在同一行闭合，不要有换行。
 
 ### 4. 验证
 - HTML 文件是否完整
