@@ -14,8 +14,8 @@ metadata:
 
 ## 核心原则
 
-1. **从本地 GeoJSON 数据查找地理信息**：`assets/data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `assets/data/taiwan.geojson`、`assets/data/hongkong.geojson`、`assets/data/macau.geojson` 按需加载
-2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `assets/lib/` 加载 Leaflet）
+1. **从本地 GeoJSON 数据查找地理信息**（文件生成在 `assets/` 目录内时，路径用 `./data/`）：`./data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson` 按需加载
+2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `assets/lib/` 加载 Leaflet）。**文件必须生成在 `open-leaflet-skill/assets/` 目录内**（这样才能用正确相对路径 `./lib/leaflet.js` 引用 Leaflet）。如果用户指定其他输出路径，则将 `assets/lib/` 目录复制到输出目录同级。
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
 5. **善用在线数据源**：优先使用 DataV.GeoAtlas API 获取实时数据，OSM Overpass API 获取全球数据
@@ -93,8 +93,8 @@ fetch(url).then(r => r.json()).then(data => {
 ### 2. 查找地理数据
 
 **中国省级数据**（优先级从高到低）：
-- 本地 `assets/data/china_provinces.geojson`（按 `properties.name` 匹配）
-- 独立文件：`assets/data/taiwan.geojson`、`assets/data/hongkong.geojson`、`assets/data/macau.geojson`
+- 本地 `./data/china_provinces.geojson`（文件生成在 `assets/` 目录内时；按 `properties.name` 匹配）
+- 独立文件：`./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson`
 - 在线：DataV.GeoAtlas `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
 
 **全球数据**：
@@ -105,11 +105,13 @@ fetch(url).then(r => r.json()).then(data => {
 
 ### 3. 生成立即可用的 HTML
 - 使用 `assets/leaf-demo.html` 作为模板
-- 本地 GeoJSON 用相对路径 `assets/data/china_provinces.geojson`
+- 本地 GeoJSON 用相对路径 `./data/china_provinces.geojson`（文件在 `assets/` 目录内时）
 - DataV API 用完整 URL（直接 fetch）
 - 必须有 fallback（数据加载失败时显示提示）
-- Leaflet 引用：`assets/lib/leaflet.css` + `assets/lib/leaflet.js`
-- 生成时需将 `assets/lib/` 目录复制到输出目录
+- **Leaflet 引用路径规则**：
+  - 文件生成在 `assets/` 目录内：使用 `./lib/leaflet.js` 和 `./lib/leaflet.css`（与模板一致）
+  - 文件生成在其他目录：使用相对于该目录的路径指向 `open-leaflet-skill/assets/lib/leaflet.js`，或将 `assets/lib/` 目录复制到输出目录同级后使用 `./lib/leaflet.js`
+- ⚠️ **常见错误**：不要用 `assets/lib/leaflet.js` 或 `open-leaflet-skill/assets/lib/leaflet.js` 作为 HTML 内部引用路径——HTML 中的路径必须是相对于 HTML 文件自身的位置。路径写错会导致 `L is not defined` 错误。
 
 ### 4. 验证
 - HTML 文件是否完整
@@ -126,8 +128,9 @@ fetch(url).then(r => r.json()).then(data => {
 参考 `references/3d-buildings-guide.md` + `assets/leaf-3d-demo.html`。使用 OSMBuildings Classic 2.5D 作为 Leaflet 插件：
 
 ```html
-<link rel="stylesheet" href="./assets/lib/leaflet.css" />
-<script src="./assets/lib/leaflet.js"></script>
+<!-- 文件生成在 assets/ 目录内时 -->
+<link rel="stylesheet" href="./lib/leaflet.css" />
+<script src="./lib/leaflet.js"></script>
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 ```
 
@@ -168,9 +171,9 @@ fetch(url).then(r => r.json()).then(data => {
 
 ## 常见用例模板
 
-### 用例 1：省份高亮
+### 用例 1：省份高亮（文件生成在 `assets/` 目录内时）
 ```javascript
-fetch('assets/data/china_provinces.geojson').then(r => r.json()).then(data => {
+fetch('./data/china_provinces.geojson').then(r => r.json()).then(data => {
   var province = data.features.find(f => f.properties.name === '四川省');
   var layer = L.geoJSON(province, { style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 } }).addTo(map);
   map.fitBounds(layer.getBounds());
