@@ -72,27 +72,49 @@ Send these prompts to your agent after the skill is installed:
 
 ## Examples
 
-### Province Highlight with Metric Card
+Each example below shows what you can say to your AI agent → the skill processes it → generates the corresponding map:
+
+---
+
+### 🏔️ Province Highlight with Metric Card
+
+**👤 You say:**
+
+> 把四川省高亮显示，用红色边框，点击弹出省会成都的数据指标卡片
+
+**🤖 Skill generates:**
 
 ![sichuan-highlight](pics/screenshot-sichuan.png)
 
-Full file: [`open-leaflet-skill/assets/examples/sichuan-highlight.html`](./open-leaflet-skill/assets/examples/sichuan-highlight.html)
+📄 [`open-leaflet-skill/assets/examples/sichuan-highlight.html`](./open-leaflet-skill/assets/examples/sichuan-highlight.html)
 
 ---
 
-### Chengdu POIs with Image Cards
+### 📍 Chengdu POIs with Image Cards
+
+**👤 You say:**
+
+> 在成都标出宽窄巷子、锦里、熊猫基地、武侯祠、杜甫草堂、青城山六个景点，每个带图文卡片展示
+
+**🤖 Skill generates:**
 
 ![chengdu-pois](pics/screenshot-chengdu.png)
 
-Full file: [`open-leaflet-skill/assets/examples/chengdu-pois.html`](./open-leaflet-skill/assets/examples/chengdu-pois.html)
+📄 [`open-leaflet-skill/assets/examples/chengdu-pois.html`](./open-leaflet-skill/assets/examples/chengdu-pois.html)
 
 ---
 
-### Population Choropleth
+### 🗺️ Population Choropleth
+
+**👤 You say:**
+
+> 做一个全国人口分级统计图，按省份用颜色深浅表示人口密度，加图例
+
+**🤖 Skill generates:**
 
 ![choropleth](pics/screenshot-choropleth.png)
 
-Full file: [`open-leaflet-skill/assets/examples/choropleth-population.html`](./open-leaflet-skill/assets/examples/choropleth-population.html)
+📄 [`open-leaflet-skill/assets/examples/choropleth-population.html`](./open-leaflet-skill/assets/examples/choropleth-population.html)
 
 ---
 
