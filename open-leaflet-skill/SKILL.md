@@ -2,6 +2,7 @@
 name: open-leaflet-skill
 description: Leaflet.js 地图技能——根据用户自然语言描述，调用 Leaflet API 生成交互式地图 Web 组件。支持地图定位、GeoJSON 加载、多边形高亮、标记、弹窗、热力图、图层控制等。
 license: MIT
+compatibility: Requires network access for map tiles (OpenStreetMap), GeoJSON data (DataV, Overpass API), and 3D buildings (OSMBuildings). Generated HTML files need a browser to display maps.
 metadata:
   category: visualization
   trigger: 地图, map, leaflet, 定位, 高亮, 轮廓线, GEOJSON, 可视化, 地理, 省份, 边界
@@ -14,7 +15,7 @@ metadata:
 ## 核心原则
 
 1. **从本地 GeoJSON 数据查找地理信息**：`assets/data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `assets/data/taiwan.geojson`、`assets/data/hongkong.geojson`、`assets/data/macau.geojson` 按需加载
-2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `lib/` 加载 Leaflet）
+2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `assets/lib/` 加载 Leaflet）
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
 5. **善用在线数据源**：优先使用 DataV.GeoAtlas API 获取实时数据，OSM Overpass API 获取全球数据
@@ -171,7 +172,7 @@ fetch(url).then(r => r.json()).then(data => {
 ```javascript
 fetch('assets/data/china_provinces.geojson').then(r => r.json()).then(data => {
   var province = data.features.find(f => f.properties.name === '四川省');
-  L.geoJSON(province, { style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 } }).addTo(map);
+  var layer = L.geoJSON(province, { style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 } }).addTo(map);
   map.fitBounds(layer.getBounds());
 });
 ```
