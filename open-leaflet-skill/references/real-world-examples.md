@@ -159,7 +159,8 @@ map.on('zoomend', function() {
 ## 四、项目架构参考
 
 ### 小项目（单 HTML 文件）
-- 所有代码在一个 HTML 中（CDN 加载 Leaflet + 插件）
+- 所有代码在一个 HTML 中（本地加载 Leaflet + 可选 CDN 插件）
+- Leaflet 必须从本地 `./lib/leaflet.js` 加载，插件从 CDN 按需引用
 - 适合：原型、演示、简单地图展示
 
 ### 中等项目（模块化）
@@ -184,29 +185,30 @@ src/
 
 ---
 
-## 五、CDN 快速引用表
+## 五、依赖引用方式
+
+> ⚠️ **重要**：Leaflet 核心库必须从本地加载，**不要使用 CDN**。
+> 插件（MarkerCluster、Leaflet.heat、OSMBuildings 等）按需从 CDN 引用。
 
 ```html
-<!-- Leaflet 1.x (推荐，稳定) -->
+<!-- Leaflet 核心库（本地加载 ✅）-->
 <link rel="stylesheet" href="./lib/leaflet.css" />
 <script src="./lib/leaflet.js"></script>
 
-<!-- Leaflet 2.0 alpha (ESM 模块，2025 年) -->
-<script type="importmap">
-  { "imports": { "leaflet": "https://unpkg.com/leaflet@2.0.0-alpha.1/dist/leaflet.js" } }
-</script>
-
-<!-- MarkerCluster -->
+<!-- MarkerCluster（插件，从 CDN 引用）-->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-<!-- Leaflet.heat -->
+<!-- Leaflet.heat（插件，从 CDN 引用）-->
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
-<!-- OSMBuildings (3D 建筑) -->
+<!-- OSMBuildings / 3D 建筑（插件，从 CDN 引用）-->
 <link rel="stylesheet" href="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings.css" />
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 ```
+
+> 注意：Leaflet v2.0 alpha（ESM 模块化版本）目前仅提供 CDN 分发，
+> 如要使用需自行下载到本地 `./lib/` 目录。生成项目时优先使用 Leaflet 1.x 稳定版（已在 `./lib/` 中）。
 
 ## 六、设计建议
 
