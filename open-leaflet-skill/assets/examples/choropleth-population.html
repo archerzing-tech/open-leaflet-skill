@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>中国各省人口分级统计图</title>
-<link rel="stylesheet" href="../../lib/leaflet.css" />
-<script src="../../lib/leaflet.js">
+<link rel="stylesheet" href="../lib/leaflet.css" />
+<script src="../lib/leaflet.js">
 </script>
 <style>
 html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -114,7 +114,7 @@ info.update = function(props) {
 
 var geojson;
 
-fetch('../../data/china_provinces.geojson')
+fetch('../data/china_provinces.geojson')
   .then(function(r) { return r.json(); })
   .then(function(data) {
     loading.classList.add('hidden');

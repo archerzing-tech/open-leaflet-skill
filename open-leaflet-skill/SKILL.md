@@ -1,5 +1,5 @@
 ---
-name: leaflet
+name: open-leaflet-skill
 description: Leaflet.js 地图技能——根据用户自然语言描述，调用 Leaflet API 生成交互式地图 Web 组件。支持地图定位、GeoJSON 加载、多边形高亮、标记、弹窗、热力图、图层控制等。
 license: MIT
 metadata:
@@ -13,7 +13,7 @@ metadata:
 
 ## 核心原则
 
-1. **从本地 GeoJSON 数据查找地理信息**：`data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `data/taiwan.geojson`、`data/hongkong.geojson`、`data/macau.geojson` 按需加载
+1. **从本地 GeoJSON 数据查找地理信息**：`assets/data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `assets/data/taiwan.geojson`、`assets/data/hongkong.geojson`、`assets/data/macau.geojson` 按需加载
 2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `lib/` 加载 Leaflet）
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
@@ -92,8 +92,8 @@ fetch(url).then(r => r.json()).then(data => {
 ### 2. 查找地理数据
 
 **中国省级数据**（优先级从高到低）：
-- 本地 `data/china_provinces.geojson`（按 `properties.name` 匹配）
-- 独立文件：`data/taiwan.geojson`、`data/hongkong.geojson`、`data/macau.geojson`
+- 本地 `assets/data/china_provinces.geojson`（按 `properties.name` 匹配）
+- 独立文件：`assets/data/taiwan.geojson`、`assets/data/hongkong.geojson`、`assets/data/macau.geojson`
 - 在线：DataV.GeoAtlas `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
 
 **全球数据**：
@@ -104,11 +104,11 @@ fetch(url).then(r => r.json()).then(data => {
 
 ### 3. 生成立即可用的 HTML
 - 使用 `assets/leaf-demo.html` 作为模板
-- 本地 GeoJSON 用相对路径 `data/china_provinces.geojson`
+- 本地 GeoJSON 用相对路径 `assets/data/china_provinces.geojson`
 - DataV API 用完整 URL（直接 fetch）
 - 必须有 fallback（数据加载失败时显示提示）
-- Leaflet 引用：`./lib/leaflet.css` + `./lib/leaflet.js`
-- 生成时需将 `lib/` 目录复制到输出目录
+- Leaflet 引用：`assets/lib/leaflet.css` + `assets/lib/leaflet.js`
+- 生成时需将 `assets/lib/` 目录复制到输出目录
 
 ### 4. 验证
 - HTML 文件是否完整
@@ -125,8 +125,8 @@ fetch(url).then(r => r.json()).then(data => {
 参考 `references/3d-buildings-guide.md` + `assets/leaf-3d-demo.html`。使用 OSMBuildings Classic 2.5D 作为 Leaflet 插件：
 
 ```html
-<link rel="stylesheet" href="./lib/leaflet.css" />
-<script src="./lib/leaflet.js"></script>
+<link rel="stylesheet" href="./assets/lib/leaflet.css" />
+<script src="./assets/lib/leaflet.js"></script>
 <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 ```
 
@@ -153,10 +153,10 @@ fetch(url).then(r => r.json()).then(data => {
 | `references/3d-buildings-guide.md` | 3D 建筑场景指南 |
 | `references/tooltip-card-guide.md` | 地图卡片 / Tooltip 指南 |
 | `references/real-world-examples.md` | 真实 Leaflet 案例参考 |
-| `data/china_provinces.geojson` | 中国省级行政区划 GeoJSON（含港澳台） |
-| `data/taiwan.geojson` | 台湾省边界 |
-| `data/hongkong.geojson` | 香港 18 区边界 |
-| `data/macau.geojson` | 澳门 8 堂区边界 |
+| `assets/data/china_provinces.geojson` | 中国省级行政区划 GeoJSON（含港澳台） |
+| `assets/data/taiwan.geojson` | 台湾省边界 |
+| `assets/data/hongkong.geojson` | 香港 18 区边界 |
+| `assets/data/macau.geojson` | 澳门 8 堂区边界 |
 | `assets/leaf-demo.html` | 默认演示（四川省高亮） |
 | `assets/leaf-effects.html` | 特效演示 |
 | `assets/leaf-3d-demo.html` | 3D 建筑演示（4 城市） |
@@ -169,7 +169,7 @@ fetch(url).then(r => r.json()).then(data => {
 
 ### 用例 1：省份高亮
 ```javascript
-fetch('data/china_provinces.geojson').then(r => r.json()).then(data => {
+fetch('assets/data/china_provinces.geojson').then(r => r.json()).then(data => {
   var province = data.features.find(f => f.properties.name === '四川省');
   L.geoJSON(province, { style: { color: '#ff0000', weight: 3, fillColor: '#ff0000', fillOpacity: 0.3 } }).addTo(map);
   map.fitBounds(layer.getBounds());

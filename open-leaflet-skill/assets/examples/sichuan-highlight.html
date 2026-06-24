@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>四川省高亮 + 成都信息卡片</title>
-<link rel="stylesheet" href="../../lib/leaflet.css" />
-<script src="../../lib/leaflet.js">
+<link rel="stylesheet" href="../lib/leaflet.css" />
+<script src="../lib/leaflet.js">
 </script>
 <style>
 html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -74,7 +74,7 @@ function loadCached(url) {
   });
 }
 
-loadCached('../../data/china_provinces.geojson').then(function(data) {
+loadCached('../data/china_provinces.geojson').then(function(data) {
   loading.classList.add('hidden');
   var sichuan = data.features.find(function(f) { return f.properties.name === '四川省'; });
   if (!sichuan) return;
