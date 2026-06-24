@@ -39,6 +39,7 @@
 <body>
 <div id="map"></div>
 <script src="./lib/leaflet.js"></script>
+<script src="./data/geo-data.js"></script>
 <script>
 // ===== 1. 初始化地图（动画与缓存优化） =====
 var map = L.map('map', {
@@ -67,19 +68,10 @@ tileLayer.on('load', function() {
   });
 });
 
-// ===== 3. GeoJSON 缓存：localStorage 避免重复加载 =====
-var CACHE_KEY = 'leaf_demo_china_geo';
-function loadGeoJSON() {
-  var cached = localStorage.getItem(CACHE_KEY);
-  if (cached && Date.now() - JSON.parse(cached).time < 86400000) {
-    return Promise.resolve(JSON.parse(cached).data);
-  }
-  return fetch('./data/china_provinces.geojson')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, time: Date.now() }));
-      return data;
-    });
+// ===== 3. 从 geo-data.js 获取 GeoJSON 数据 =====
+var chinaData = GEO_DATA && GEO_DATA.china_provinces;
+if (!chinaData) {
+  console.error('GeoJSON data not loaded. Make sure data/geo-data.js is included.');
 }
 
 // ===== 4. 信息控件 =====
@@ -92,9 +84,7 @@ info.onAdd = function() {
 info.addTo(map);
 
 // ===== 5. 加载中国省级数据并高亮四川省 =====
-loadGeoJSON()
-  .then(function(r) { return r.json(); })
-  .then(function(chinaData) {
+function initMap(chinaData) {
     // 筛选出四川省
     var sichuanData = chinaData.features.filter(function(f) {
       return f.properties.name === '四川省';
@@ -152,19 +142,11 @@ loadGeoJSON()
         });
       }
     }).addTo(map);
-  })
-  .catch(function(err) {
-    console.error('加载 GeoJSON 失败:', err);
-    // 回退：如果没有本地数据，尝试从 DataV API 加载
-    fetch('https://geo.datav.aliyun.com/areas_v3/bound/510000_full.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var layer = L.geoJSON(data, {
-          style: { color: '#ff4444', weight: 3, fillColor: '#ff4444', fillOpacity: 0.15 }
-        }).addTo(map);
-        map.fitBounds(layer.getBounds().pad(0.1));
-      });
-  });
+}
+
+if (chinaData) {
+  initMap(chinaData);
+}
 
 // ===== 6. 图例 =====
 var legend = L.control({ position: 'bottomright' });
