@@ -2,7 +2,7 @@
 name: open-leaflet-skill
 description: Leaflet.js 地图技能——根据用户自然语言描述，调用 Leaflet API 生成交互式地图 Web 组件。支持地图定位、GeoJSON 加载、多边形高亮、标记、弹窗、热力图、图层控制等。
 license: MIT
-compatibility: Requires network access for map tiles (OpenStreetMap), GeoJSON data (DataV, Overpass API), and 3D buildings (OSMBuildings). Generated HTML files need a browser to display maps.
+compatibility: Requires network access for map tiles (OpenStreetMap), GeoJSON data (DataV, Overpass API), and 3D buildings (f4map API). Generated HTML files need a browser to display maps.
 metadata:
   category: visualization
   trigger: 地图, map, leaflet, 定位, 高亮, 轮廓线, GEOJSON, 可视化, 地理, 省份, 边界
@@ -124,18 +124,28 @@ fetch(url).then(r => r.json()).then(data => {
 
 参考 `references/effects-guide.md` + `assets/leaf-effects.html`。支持：遮罩（Mask）、发光（Glow）、脉动（Pulse）、蚂蚁线（Marching Ants）、颜色变换（Color Transform）。默认不含特效，按需添加，建议用 checkbox 控制开关。
 
-## 3D 建筑场景（OSM Buildings）
+## 3D 建筑场景（f4map）
 
-参考 `references/3d-buildings-guide.md` + `assets/leaf-3d-demo.html`。使用 OSMBuildings Classic 2.5D 作为 Leaflet 插件：
+参考 `references/3d-buildings-guide.md` + `assets/examples/shanghai-3d.html`。使用 [f4map](https://f4map.com) Buildings Tile API 获取实时 OSM 建筑数据，用 Leaflet Polygon 挤出实现 3D 效果：
 
 ```html
 <!-- 文件生成在 assets/ 目录内时 -->
 <link rel="stylesheet" href="./lib/leaflet.css" />
 <script src="./lib/leaflet.js"></script>
-<script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
 ```
 
-注意事项：zoom 15-20、需要底图配合、`keepBuffer: 8`、中国主要城市数据较完整。
+数据端点：`https://buildings.f4map.com/buildings/{z}/{x}/{y}.json?query={"maxage":43200,"straightSkeleton":1}`
+
+`way` 字段格式（tile 局部坐标，65536 网格，增量编码）：
+- `P((x1 y1,dx2 dy2,...))` — 多边形
+- `M(((ring1)),((ring2)))` — 多多边形
+- `N(x y)` — 点（跳过）
+
+坐标转换（tile → lat/lng）：`lat = atan(sinh(π - (ty + cy/65536)/2^z * 2π)) * 180/π`，`lon = (tx + cx/65536)/2^z * 360 - 180`
+
+3D 挤出：基座（地面）→ 墙面（连接基座和屋顶顶点）→ 屋顶（NE 偏移 `height * 0.000004`）
+
+注意事项：使用 zoom 16 获取数据、缓存 `osm_id` 防重复、`keepBuffer: 8`、中国主要城市数据较完整。
 
 ## 地图卡片（Tooltip / Popup）
 
@@ -164,11 +174,14 @@ fetch(url).then(r => r.json()).then(data => {
 | `assets/data/macau.geojson` | 澳门 8 堂区边界 |
 | `assets/leaf-demo.html` | 默认演示（四川省高亮） |
 | `assets/leaf-effects.html` | 特效演示 |
-| `assets/leaf-3d-demo.html` | 3D 建筑演示（4 城市） |
+| `assets/leaf-3d-demo.html` | 3D 建筑演示（上海/香港/重庆） |
 | `assets/leaf-card-demo.html` | 地图卡片演示（6 POI + 3 模式） |
 | `assets/examples/sichuan-highlight.html` | 案例：四川省高亮 + 指标卡片 |
 | `assets/examples/chengdu-pois.html` | 案例：成都 6 景点图文卡片 |
 | `assets/examples/choropleth-population.html` | 案例：全国人口分级统计图 |
+| `assets/examples/shanghai-3d.html` | 案例：上海金茂中心 3D 直升机视角 |
+| `assets/examples/hongkong-3d.html` | 案例：香港维多利亚港 3D 直升机视角 |
+| `assets/examples/chongqing-3d.html` | 案例：重庆解放碑 3D 直升机视角 |
 
 ## 常见用例模板
 
@@ -197,8 +210,15 @@ L.geoJSON(data, { onEachFeature: (f, l) => l.on({ mouseover: highlight, mouseout
 
 ### 用例 4：3D 建筑
 ```javascript
-var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
-osmb.style({ shadows: true });
+// 加载本地 3D 建筑数据
+var xhr = new XMLHttpRequest();
+xhr.open('GET', './data/3d/shanghai/buildings.json', true);
+xhr.onload = function() {
+  var data = JSON.parse(xhr.responseText);
+  osmb.set(data);
+  osmb.style({ shadows: true });
+};
+xhr.send();
 ```
 
 ### 用例 5：分级统计图

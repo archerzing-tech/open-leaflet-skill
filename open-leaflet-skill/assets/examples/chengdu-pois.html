@@ -53,6 +53,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19, keepBuffer: 8
 }).addTo(map);
 
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: '../lib/images/marker-icon-2x.png',
+  iconUrl: '../lib/images/marker-icon.png',
+  shadowUrl: '../lib/images/marker-shadow.png',
+});
+
 var pois = [
   {
     lat: 30.670, lng: 104.063, name: '天府广场', sub: '市中心地标',

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重庆解放碑 3D · 直升机视角</title>
+<link rel="stylesheet" href="../lib/leaflet.css" />
+<script src="../lib/leaflet.js"></script>
+<script src="../lib/OSMBuildings-Leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+#map{height:100%;width:100%;background:#e8e8e0}
+.title-bar{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);color:#fff;padding:10px 24px;border-radius:12px;font-size:15px;font-weight:600;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.title-bar span{color:#94a3b8;font-weight:400}
+.tip{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);color:#fff;padding:14px 22px;border-radius:12px;font-size:13px;text-align:center;min-width:200px;opacity:0;transition:opacity .35s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.tip.show{opacity:1}
+.tip strong{color:#60a5fa;font-size:16px}
+.hint{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;color:#999;font-size:11px;background:rgba(255,255,255,.6);padding:4px 12px;border-radius:6px;pointer-events:none}
+.loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;background:rgba(255,255,255,.95);border-radius:16px;padding:24px 36px;box-shadow:0 8px 32px rgba(0,0,0,.12);text-align:center;font-size:15px;color:#555;transition:opacity .4s;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:220px}
+.loading.hidden{opacity:0;pointer-events:none}
+.spinner{width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.attribution{position:absolute;bottom:4px;right:4px;z-index:999;font-size:10px;color:#aaa;background:rgba(255,255,255,.5);padding:2px 6px;border-radius:4px}
+.attribution a{color:#999;text-decoration:none}
+</style>
+</head>
+<body>
+<div id="map">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <span>加载 3D 建筑数据...</span>
+  </div>
+</div>
+<div class="title-bar">🏢 重庆解放碑 <span>· 直升机视角</span></div>
+<div class="tip" id="tip"></div>
+<div class="hint">点击建筑查看信息 · S 键切换透视视角</div>
+<div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · 建筑数据 © OSM</div>
+<script>
+var map = L.map('map', {
+  center: [29.562, 106.574], zoom: 16,
+  zoomControl: false, attributionControl: false
+});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19
+}).addTo(map);
+
+var osmb = new OSMBuildings(map);
+osmb.style({ color: '#e8e8e8', roofColor: '#f5f5f0', altColor: '#d0d0d0', shadows: false });
+
+// Helicopter perspective tilt
+var tiltEnabled = true;
+var tiltApplied = false;
+function applyTilt(on) {
+  document.querySelectorAll('.leaflet-overlay-pane canvas').forEach(function(c) {
+    c.style.transform = on ? 'perspective(900px) rotateX(45deg)' : '';
+    c.style.transformOrigin = 'center bottom';
+  });
+}
+var origOnAdd = osmb.onAdd;
+osmb.onAdd = function(m) {
+  origOnAdd.call(this, m);
+  if (!tiltApplied) { tiltApplied = true; setTimeout(function() { applyTilt(tiltEnabled); }, 50); }
+};
+
+var tip = document.getElementById('tip');
+var loading = document.getElementById('loading');
+var WALL_COLOR = '#e8e8e8', ROOF_COLOR = '#f5f5f0', ALT_COLOR = '#d0d0d0';
+
+// Load local GeoJSON for Chongqing Jiefangbei
+var xhr = new XMLHttpRequest();
+xhr.open('GET', '../data/3d/chongqing/buildings.json', true);
+xhr.onload = function() {
+  if (xhr.status !== 200) { console.error('Failed to load GeoJSON:', xhr.status); return; }
+  try {
+    var data = JSON.parse(xhr.responseText);
+    var features = data.features.map(function(f) {
+      var h = f.properties.height || 20;
+      // Data stored as [lat, lng] — swap to [lng, lat] for OSMBuildings
+      var coords = f.geometry.coordinates[0].map(function(c) {
+        return [c[1], c[0]];
+      });
+      coords.push(coords[0]);
+      return {
+        type: 'Feature',
+        properties: { height: h, wallColor: WALL_COLOR, roofColor: ROOF_COLOR, altColor: ALT_COLOR },
+        geometry: { type: 'Polygon', coordinates: [coords] }
+      };
+    });
+    osmb.set({ type: 'FeatureCollection', features: features });
+  } catch(e) { console.error(e); }
+  loading.classList.add('hidden');
+};
+xhr.onerror = function() { console.error('XHR failed for GeoJSON'); loading.classList.add('hidden'); };
+xhr.send();
+
+osmb.click(function(e) {
+  var props = (e.feature && e.feature.properties) ? e.feature.properties : (e.properties || {});
+  var h = props.height || 0;
+  tip.innerHTML = '高度 <strong>' + h + '</strong> m · ' + Math.round(h / 3.8) + ' 层';
+  tip.classList.add('show');
+});
+map.on('click', function() { tip.classList.remove('show'); });
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 's' || e.key === 'S') {
+    tiltEnabled = !tiltEnabled;
+    applyTilt(tiltEnabled);
+  }
+});
+
+if (window.ResizeObserver) {
+  new ResizeObserver(function() { map.invalidateSize(); }).observe(document.getElementById('map'));
+}
+</script>
+</body>
+</html>
