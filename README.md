@@ -117,6 +117,22 @@ Each example below shows what you can say to your AI agent → the skill process
 
 ---
 
+### 🏔️ 四川省 2.5D 隆起 + 市界分割
+
+**👤 You say:**
+
+> 做一个四川省的 2.5D 隆起地图，全省立体挤出，市界分割线清晰可见，可调节挤出高度
+
+**🤖 Skill generates:**
+
+![sichuan-pseudo3d](pics/screenshot-pseudo3d.png)
+
+📄 [`open-leaflet-skill/assets/examples/sichuan-pseudo3d.html`](./open-leaflet-skill/assets/examples/sichuan-pseudo3d.html)
+
+> 全省统一 `#6366f1` 紫色挤出 · 白色市界分割线 · 21 城市名称标签 · 高度滑块 10–80px · 地图平视无倾斜
+
+---
+
 ### All Demo Files
 
 | File | Description |
@@ -127,6 +143,7 @@ Each example below shows what you can say to your AI agent → the skill process
 | `open-leaflet-skill/assets/examples/sichuan-highlight.html` | Province highlight with metric card |
 | `open-leaflet-skill/assets/examples/chengdu-pois.html` | 6 Chengdu POIs with image cards |
 | `open-leaflet-skill/assets/examples/choropleth-population.html` | Population choropleth by province |
+| `open-leaflet-skill/assets/examples/sichuan-pseudo3d.html` | Sichuan 2.5D unified extrusion with city boundary lines |
 
 ---
 
@@ -160,7 +177,8 @@ open-leaflet-skill/                       # Project root
         ├── examples/
         │   ├── sichuan-highlight.html
         │   ├── chengdu-pois.html
-        │   └── choropleth-population.html
+        │   ├── choropleth-population.html
+        │   └── sichuan-pseudo3d.html
         ├── data/                         # GeoJSON data
         │   ├── china_provinces.geojson
         │   ├── taiwan.geojson
