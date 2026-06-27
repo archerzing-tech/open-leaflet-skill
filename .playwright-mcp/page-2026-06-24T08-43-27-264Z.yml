@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e114]: 🏙️ 上海陆家嘴 · f4map 3D 瓦片
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - strong: f4map 渲染
+  - generic [ref=e115]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e116] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 3D 瓦片
+    - link "f4map" [ref=e117] [cursor=pointer]:
+      - /url: https://f4map.com

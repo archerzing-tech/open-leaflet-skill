@@ -1,0 +1,33 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e3]: 🏙️ 上海陆家嘴 · 3D 建筑模型（Polygon 挤出）
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 颜色
+        - strong: 高度着色
+  - generic [ref=e4]:
+    - generic [ref=e5]: 建筑高度
+    - generic [ref=e7]:
+      - generic [ref=e8]: 低
+      - generic [ref=e9]: 中
+      - generic [ref=e10]: 高
+      - generic [ref=e11]: 超高
+      - generic [ref=e12]: 摩天
+  - generic:
+    - generic: 加载建筑数据...
+  - generic [ref=e13]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e14] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright

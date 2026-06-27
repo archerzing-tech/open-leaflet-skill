@@ -3,26 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>香港维多利亚港 3D · 直升机视角</title>
+<title>香港维多利亚港 3D</title>
 <link rel="stylesheet" href="../lib/leaflet.css" />
 <script src="../lib/leaflet.js"></script>
 <script src="../lib/OSMBuildings-Leaflet.js"></script>
+<script src="../data/3d/hongkong/buildings.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-#map{height:100%;width:100%;background:#e8e8e0}
+#map{height:100%;width:100%;background:#2d2d30}
 .title-bar{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);color:#fff;padding:10px 24px;border-radius:12px;font-size:15px;font-weight:600;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 .title-bar span{color:#94a3b8;font-weight:400}
 .tip{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);color:#fff;padding:14px 22px;border-radius:12px;font-size:13px;text-align:center;min-width:200px;opacity:0;transition:opacity .35s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .tip.show{opacity:1}
 .tip strong{color:#60a5fa;font-size:16px}
-.hint{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;color:#999;font-size:11px;background:rgba(255,255,255,.6);padding:4px 12px;border-radius:6px;pointer-events:none}
+.hint{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;color:#999;font-size:11px;background:rgba(0,0,0,.5);padding:4px 12px;border-radius:6px;pointer-events:none}
 .loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;background:rgba(255,255,255,.95);border-radius:16px;padding:24px 36px;box-shadow:0 8px 32px rgba(0,0,0,.12);text-align:center;font-size:15px;color:#555;transition:opacity .4s;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:220px}
 .loading.hidden{opacity:0;pointer-events:none}
 .spinner{width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .attribution{position:absolute;bottom:4px;right:4px;z-index:999;font-size:10px;color:#aaa;background:rgba(255,255,255,.5);padding:2px 6px;border-radius:4px}
 .attribution a{color:#999;text-decoration:none}
+.control-ring{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);z-index:1000;width:150px;height:150px;border-radius:50%;background:rgba(20,20,25,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:2px solid rgba(255,255,255,0.15);cursor:grab;user-select:none;touch-action:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.control-ring:active{cursor:grabbing}
+.ring-knob{position:absolute;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#2563eb);left:calc(50% - 10px);top:calc(50% - 10px);transform:translate(0,0);pointer-events:none;box-shadow:0 2px 12px rgba(37,99,235,.5);transition:width .2s,height .2s;z-index:2;border:2px solid rgba(255,255,255,.3)}
+.ring-knob.dragging{width:24px;height:24px;left:calc(50% - 12px);top:calc(50% - 12px)}
+.ring-ring{position:absolute;top:12px;left:12px;right:12px;bottom:12px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);pointer-events:none;z-index:1}
+.ring-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:3}
+.ring-display .mode-tag{color:rgba(255,255,255,.35);font-size:9px;display:block;letter-spacing:1px;margin-bottom:1px}
+.ring-display .tilt-val{color:#60a5fa;font-size:18px;font-weight:700;display:block;line-height:1.2}
+.ring-display .azim-val{color:rgba(255,255,255,.5);font-size:10px;display:block;margin-top:1px}
+.ring-reset{position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);border:0;background:rgba(20,20,25,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:rgba(255,255,255,.6);padding:3px 14px;border-radius:6px;font-size:11px;cursor:pointer;transition:color .2s,background .2s;white-space:nowrap}
+.ring-reset:hover{color:#fff;background:rgba(37,99,235,.6)}
+.ring-mode-bar{position:absolute;top:-30px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:4;white-space:nowrap}
+.ring-mode-btn{border:0;background:rgba(20,20,25,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:rgba(255,255,255,.35);padding:3px 10px;border-radius:6px;font-size:10px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.ring-mode-btn.active{color:#60a5fa;background:rgba(37,99,235,.25)}
+.ring-mode-btn:hover{color:#fff}
 </style>
 </head>
 <body>
@@ -32,49 +48,48 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
     <span>加载 3D 建筑数据...</span>
   </div>
 </div>
-<div class="title-bar">🏢 香港维多利亚港 <span>· 直升机视角</span></div>
+<div class="title-bar">🏢 香港维多利亚港 3D 建筑群</div>
 <div class="tip" id="tip"></div>
-<div class="hint">点击建筑查看信息 · S 键切换透视视角</div>
+<div class="control-ring" id="controlRing">
+  <div class="ring-mode-bar">
+    <button class="ring-mode-btn active" data-mode="view">视角</button>
+    <button class="ring-mode-btn" data-mode="pos">位置</button>
+  </div>
+  <div class="ring-ring"></div>
+  <div class="ring-display">
+    <span class="mode-tag" id="ringMode">视角</span>
+    <span class="tilt-val" id="ringTilt">55°</span>
+    <span class="azim-val" id="ringAzim">旋转 348°</span>
+  </div>
+  <div class="ring-knob" id="ringKnob"></div>
+  <button class="ring-reset" id="ringReset">↺ 重置视角</button>
+</div>
+<div class="hint">点击建筑查看信息</div>
 <div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · 建筑数据 © OSM</div>
 <script>
 var map = L.map('map', {
-  center: [22.285, 114.160], zoom: 15,
+  center: [22.285, 114.160], zoom: 16,
   zoomControl: false, attributionControl: false
 });
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19
+L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+  maxZoom: 18, subdomains: '1234'
 }).addTo(map);
+// Darken tile layer for contrast with 3D buildings
+setTimeout(function() {
+  var pane = document.querySelector('.leaflet-tile-pane');
+  if (pane) pane.style.filter = 'brightness(0.35) contrast(1.6) saturate(0.3) grayscale(0.25)';
+}, 100);
 
 var osmb = new OSMBuildings(map);
-osmb.style({ color: '#e8e8e8', roofColor: '#f5f5f0', altColor: '#d0d0d0', shadows: false });
-
-// Helicopter perspective tilt
-var tiltEnabled = true;
-var tiltApplied = false;
-function applyTilt(on) {
-  document.querySelectorAll('.leaflet-overlay-pane canvas').forEach(function(c) {
-    c.style.transform = on ? 'perspective(900px) rotateX(45deg)' : '';
-    c.style.transformOrigin = 'center bottom';
-  });
-}
-var origOnAdd = osmb.onAdd;
-osmb.onAdd = function(m) {
-  origOnAdd.call(this, m);
-  if (!tiltApplied) { tiltApplied = true; setTimeout(function() { applyTilt(tiltEnabled); }, 50); }
-};
+osmb.style({ color: '#c8ced8', roofColor: '#a8b0bc', altColor: '#d8dce4', shadows: true });
 
 var tip = document.getElementById('tip');
 var loading = document.getElementById('loading');
-var WALL_COLOR = '#e8e8e8', ROOF_COLOR = '#f5f5f0', ALT_COLOR = '#d0d0d0';
 
-// Load local GeoJSON for Hong Kong Victoria Harbour
-var xhr = new XMLHttpRequest();
-xhr.open('GET', '../data/3d/hongkong/buildings.json', true);
-xhr.onload = function() {
-  if (xhr.status !== 200) { console.error('Failed to load GeoJSON:', xhr.status); return; }
+// Process inline building data
+function loadBuildings() {
   try {
-    var data = JSON.parse(xhr.responseText);
-    var features = data.features.map(function(f) {
+    var features = HONGKONG_BUILDINGS.features.map(function(f) {
       var h = f.properties.height || 20;
       var coords = f.geometry.coordinates[0].map(function(c) {
         return [c[1], c[0]]; // Swap [lat, lng] to [lng, lat] for OSMBuildings
@@ -82,16 +97,20 @@ xhr.onload = function() {
       coords.push(coords[0]);
       return {
         type: 'Feature',
-        properties: { height: h, wallColor: WALL_COLOR, roofColor: ROOF_COLOR, altColor: ALT_COLOR },
+        properties: { height: h, wallColor: '#b0b8c5', roofColor: '#8a92a0', altColor: '#c5ccd8' },
         geometry: { type: 'Polygon', coordinates: [coords] }
       };
     });
     osmb.set({ type: 'FeatureCollection', features: features });
   } catch(e) { console.error(e); }
   loading.classList.add('hidden');
-};
-xhr.onerror = function() { console.error('XHR failed for GeoJSON'); loading.classList.add('hidden'); };
-xhr.send();
+}
+loadBuildings();
+
+// Initial perspective matching f4map theta=58.6°, phi=-11.5°
+setTimeout(function() {
+  updateRing(46.7, -45.8);
+}, 500);
 
 osmb.click(function(e) {
   var props = (e.feature && e.feature.properties) ? e.feature.properties : (e.properties || {});
@@ -101,11 +120,113 @@ osmb.click(function(e) {
 });
 map.on('click', function() { tip.classList.remove('show'); });
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 's' || e.key === 'S') {
-    tiltEnabled = !tiltEnabled;
-    applyTilt(tiltEnabled);
+// === Control Ring: dual-mode ===
+var controlRing = document.getElementById('controlRing');
+var ringKnob = document.getElementById('ringKnob');
+var ringTilt = document.getElementById('ringTilt');
+var ringAzim = document.getElementById('ringAzim');
+var ringMode = document.getElementById('ringMode');
+var ringReset = document.getElementById('ringReset');
+var RK = 50; // max drag radius
+var curMode = 'view';
+var curTilt = 0, curAzim = 0;
+var initZoom = 16;
+
+function applyView(tilt, azim) {
+  var op = document.querySelector('.leaflet-overlay-pane');
+  if (!op) return;
+  if (tilt > 0 || azim > 0) {
+    var t = '';
+    if (azim > 0) t += 'rotateY(' + azim + 'deg) ';
+    if (tilt > 0) t += 'rotateX(' + tilt + 'deg)';
+    op.style.transform = 'perspective(900px) ' + t;
+    op.style.transformOrigin = 'bottom center';
+    op.style.transformStyle = 'preserve-3d';
+  } else {
+    op.style.transform = '';
+    op.style.transformOrigin = '';
+    op.style.transformStyle = '';
   }
+}
+
+function updateRing(dx, dy) {
+  var dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist > RK) { dx = dx/dist * RK; dy = dy/dist * RK; }
+  ringKnob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+
+  if (curMode === 'view') {
+    // Mode 视角: ↑↓ tilt (0-60°), ←→ rotation (0-360°)
+    curTilt = dy > 0 ? 0 : Math.min(60, Math.round(-dy / RK * 60));
+    curAzim = Math.round((dx / RK + 1) / 2 * 360);
+    if (curAzim < 0) curAzim = 0; if (curAzim > 360) curAzim = 360;
+    ringTilt.textContent = curTilt + '°';
+    ringAzim.textContent = '旋转 ' + curAzim + '°';
+    applyView(curTilt, curAzim);
+  } else {
+    // Mode 位置: ↑↓ height/zoom, ←→ zoom fine-tune
+    var zoomDelta = Math.round(-dy / RK * 3 + dx / RK * 1.5);
+    var zoomTarget = Math.max(14, Math.min(19, initZoom + zoomDelta));
+    map.setZoom(zoomTarget);
+    ringTilt.textContent = 'Z' + zoomTarget;
+    ringAzim.textContent = '缩放 ' + zoomTarget;
+  }
+}
+
+// Drag events
+controlRing.addEventListener('mousedown', function(e) {
+  e.preventDefault();
+  var rect = controlRing.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  ringKnob.classList.add('dragging');
+  function onMove(me) { updateRing(me.clientX - cx, me.clientY - cy); }
+  function onUp() {
+    ringKnob.classList.remove('dragging');
+    if (curMode === 'pos') initZoom = map.getZoom();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});
+controlRing.addEventListener('touchstart', function(e) {
+  var rect = controlRing.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  ringKnob.classList.add('dragging');
+  function onMove(te) {
+    te.preventDefault();
+    var t = te.touches[0];
+    updateRing(t.clientX - cx, t.clientY - cy);
+  }
+  function onEnd() {
+    ringKnob.classList.remove('dragging');
+    if (curMode === 'pos') initZoom = map.getZoom();
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+  }
+  document.addEventListener('touchmove', onMove, {passive:false});
+  document.addEventListener('touchend', onEnd);
+});
+ringReset.addEventListener('click', function() {
+  if (curMode === 'view') {
+    updateRing(46.7, -45.8);
+    map.setZoom(initZoom);
+  } else {
+    initZoom = 16;
+    updateRing(0, 0);
+  }
+});
+
+// Mode switching
+var modeBtns = document.querySelectorAll('.ring-mode-btn');
+modeBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    modeBtns.forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    curMode = this.dataset.mode;
+    ringMode.textContent = curMode === 'view' ? '视角' : '位置';
+    initZoom = map.getZoom();
+    updateRing(0, 0);
+  });
 });
 
 if (window.ResizeObserver) {

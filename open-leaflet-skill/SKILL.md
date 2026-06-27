@@ -2,7 +2,7 @@
 name: open-leaflet-skill
 description: Leaflet.js 地图技能——根据用户自然语言描述，调用 Leaflet API 生成交互式地图 Web 组件。支持地图定位、GeoJSON 加载、多边形高亮、标记、弹窗、热力图、图层控制等。
 license: MIT
-compatibility: Requires network access for map tiles (OpenStreetMap), GeoJSON data (DataV, Overpass API), and 3D buildings (f4map API). Generated HTML files need a browser to display maps.
+compatibility: Requires network access for map tiles (OpenStreetMap). GeoJSON data supports multiple channels (DataV, GeoJSON.cn, Tianditu, local files) optimized for China network environment. Generated HTML files need a browser to display maps.
 metadata:
   category: visualization
   trigger: 地图, map, leaflet, 定位, 高亮, 轮廓线, GEOJSON, 可视化, 地理, 省份, 边界
@@ -14,11 +14,12 @@ metadata:
 
 ## 核心原则
 
-1. **从本地 GeoJSON 数据查找地理信息**（文件生成在 `assets/` 目录内时，路径用 `./data/`）：`./data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson` 按需加载
+1. **从本地 GeoJSON 数据查找地理信息**（文件生成在 `assets/` 目录内时，路径用 `./data/`）：`./data/china_provinces.geojson` 包含全国所有省级行政区划（含港澳台），也支持独立文件 `./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson` 按需加载。也支持 `./data/geo-data.js` 通过 `GEO_DATA` 全局变量方式引入。
+   - **多通道 fallback 策略**：推荐实现 DataV → GeoJSON.cn → 本地文件 → CDN 镜像的降级加载链，参见 `references/data-sources.md`
 2. **生成独立 HTML 文件**：产出是自包含的 `.html` 文件（双击可打开，使用本地 `assets/lib/` 加载 Leaflet）。**文件必须生成在 `open-leaflet-skill/assets/` 目录内**（这样才能用正确相对路径 `./lib/leaflet.js` 引用 Leaflet）。如果用户指定其他输出路径，则将 `assets/lib/` 目录复制到输出目录同级。
 3. **组件化 + 可嵌入**：每个 HTML 文件包含完整的 Leaflet 地图组件，**默认支持嵌入到任何页面或 iframe**
 4. **事实验证先于假设**：涉及具体地理信息时，先搜索确认
-5. **善用在线数据源**：优先使用 DataV.GeoAtlas API 获取实时数据，OSM Overpass API 获取全球数据
+5. **善用多通道数据源**：优先使用国内可访问的数据源（DataV.GeoAtlas、GeoJSON.cn、天地图），辅以本地预置文件和 CDN 镜像作为 fallback。完整参考 → `references/data-sources.md`
 
 ## 地图缓存与显示优化（所有生成的文件必须包含）
 
@@ -92,22 +93,26 @@ fetch(url).then(r => r.json()).then(data => {
 
 ### 2. 查找地理数据
 
-**中国省级数据**（优先级从高到低）：
-- 本地 `./data/china_provinces.geojson`（文件生成在 `assets/` 目录内时；按 `properties.name` 匹配）
-- 独立文件：`./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson`
-- 在线：DataV.GeoAtlas `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
+**中国省级数据**（优先级从高到低，多通道 fallback）：
+1. 本地文件 `./data/china_provinces.geojson`（文件生成在 `assets/` 目录内时；按 `properties.name` 匹配）— **最快最稳，无需网络**
+2. 独立文件：`./data/taiwan.geojson`、`./data/hongkong.geojson`、`./data/macau.geojson`
+3. DataV.GeoAtlas（国内极快）：`https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
+4. GeoJSON.cn（国内极快）：`https://geojson.cn/api/china/{adcode}.json`
+5. jsDelivr CDN 镜像：`https://cdn.jsdelivr.net/gh/xyanmi/MapData@main/provinces.cn.geojson`
 
-**全球数据**：
-- 自然地球：`https://raw.githubusercontent.com/xyanmi/MapData/main/countries.geojson`
-- Overpass API：`https://overpass-api.de/api/interpreter`
-- 先用 Nominatim 查 OSM ID：`https://nominatim.openstreetmap.org/search?q=地名&format=json`
-- 完整参考 → `references/data-sources.md`
+**全球数据**（国内可能受限，建议下载后本地使用）：
+- geoBoundaries：`https://www.geoboundaries.org/` — CC BY 4.0 开放许可
+- Overpass API：`https://overpass-api.de/api/interpreter` — 实时查询
+- Nominatim（地名查询）：`https://nominatim.openstreetmap.org/search?q=地名&format=json`
+- 自然地球（CDN 镜像）：`https://cdn.jsdelivr.net/gh/xyanmi/MapData@main/countries.geojson`
+
+> 完整数据源参考 → `references/data-sources.md`（含 8 个渠道详解、坐标系转换、多通道 fallback 代码）
 
 ### 3. 生成立即可用的 HTML
 - 使用 `assets/leaf-demo.html` 作为模板
 - 本地 GeoJSON 用相对路径 `./data/china_provinces.geojson`（文件在 `assets/` 目录内时）
-- DataV API 用完整 URL（直接 fetch）
-- 必须有 fallback（数据加载失败时显示提示）
+- 在线 API 用完整 URL（直接 fetch），推荐实现多通道 fallback：DataV → GeoJSON.cn → 本地文件 → CDN 镜像
+- 必须有 fallback（数据加载失败时显示提示），参考 `references/data-sources.md` 中的 `loadGeoJSON` 函数
 - **Leaflet 引用路径规则**：
   - 文件生成在 `assets/` 目录内：使用 `./lib/leaflet.js` 和 `./lib/leaflet.css`（与模板一致）
   - 文件生成在其他目录：使用相对于该目录的路径指向 `open-leaflet-skill/assets/lib/leaflet.js`，或将 `assets/lib/` 目录复制到输出目录同级后使用 `./lib/leaflet.js`

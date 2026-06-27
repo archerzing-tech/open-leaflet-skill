@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e43577]: 🏢 香港维多利亚港 · 45° 鸟瞰
+  - generic [ref=e43578]:
+    - text: 建筑
+    - strong [ref=e43579]: "3043"
+    - text: 栋
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 年份
+        - strong: —
+  - generic [ref=e43580]:
+    - generic [ref=e43581]: 建筑高度
+    - generic [ref=e43583]:
+      - generic [ref=e43584]: "50"
+      - generic [ref=e43585]: "100"
+      - generic [ref=e43586]: "200"
+      - generic [ref=e43587]: "300"
+      - generic [ref=e43588]: 400+
+  - generic:
+    - generic: 加载 f4map 建筑数据...
+  - generic [ref=e43589]: 3043 建筑
+  - generic [ref=e43590]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e43591] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e43592] [cursor=pointer]:
+      - /url: https://f4map.com

@@ -1,0 +1,13 @@
+- generic [ref=e2]:
+  - generic:
+    - generic [ref=e3]:
+      - button "Zoom in" [ref=e4] [cursor=pointer]: +
+      - button "Zoom out" [ref=e5] [cursor=pointer]: −
+    - generic [ref=e6]:
+      - link "Leaflet" [ref=e7] [cursor=pointer]:
+        - /url: https://leafletjs.com
+        - img [ref=e8]
+        - text: Leaflet
+      - text: "| © OSM, ©"
+      - link "OSM Buildings" [ref=e12] [cursor=pointer]:
+        - /url: http://osmbuildings.org

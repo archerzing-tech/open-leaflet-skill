@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e3]: 🏢 香港中环 · f4map 建筑数据
+  - generic [ref=e4]:
+    - text: 建筑
+    - strong [ref=e5]: "473"
+    - text: 栋
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 年份
+        - strong: —
+  - generic [ref=e6]:
+    - generic [ref=e7]: 建筑高度
+    - generic [ref=e9]:
+      - generic [ref=e10]: "50"
+      - generic [ref=e11]: "100"
+      - generic [ref=e12]: "200"
+      - generic [ref=e13]: "300"
+      - generic [ref=e14]: 400+
+  - generic:
+    - generic: 加载 f4map 建筑数据...
+  - generic [ref=e15]: 473 建筑
+  - generic [ref=e16]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e17] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e18] [cursor=pointer]:
+      - /url: https://f4map.com

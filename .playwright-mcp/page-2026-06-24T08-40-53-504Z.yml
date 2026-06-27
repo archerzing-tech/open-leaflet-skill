@@ -1,0 +1,23 @@
+- generic [active] [ref=e1]:
+  - link " Discover our solutions" [ref=e2] [cursor=pointer]:
+    - /url: //www.f4map.com
+    - generic [ref=e3]: 
+    - text: Discover our solutions
+  - generic "i to toggle interface" [ref=e4] [cursor=pointer]:
+    - img "F4" [ref=e5]
+  - banner [ref=e13]:
+    - generic [ref=e14]:
+      - generic "i to toggle interface" [ref=e15] [cursor=pointer]:
+        - img "F4" [ref=e16]
+      - generic:
+        - textbox "Search a place..." [ref=e25]
+        - button "" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]: 
+      - navigation:
+        - button "" [ref=e28] [cursor=pointer]:
+          - generic [ref=e29]: 
+        - text:    
+      - generic:    
+  - generic:
+    - generic:       
+  - text:  Last name – First name or Company (required) E-mail (required) Subject Message (required)

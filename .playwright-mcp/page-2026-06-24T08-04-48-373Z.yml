@@ -1,0 +1,34 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]: 🏙️ 上海陆家嘴 · 3D 建筑天际线
+  - generic [ref=e4]:
+    - button "☀️ 阴影" [ref=e5] [cursor=pointer]
+    - button "🔄 重置视角" [ref=e6] [cursor=pointer]
+  - generic:
+    - generic: —
+    - generic: 上海浦东新区
+    - generic:
+      - generic:
+        - generic: —
+        - generic: 高度 (m)
+      - generic:
+        - generic: —
+        - generic: 楼层
+      - generic:
+        - generic: —
+        - generic: 区域
+  - generic [ref=e7]:
+    - generic [ref=e8]: 建筑高度
+    - generic [ref=e10]:
+      - generic [ref=e11]: 低
+      - generic [ref=e12]: 中
+      - generic [ref=e13]: 高
+      - generic [ref=e14]: 超高
+      - generic [ref=e15]: 摩天
+  - generic [ref=e18]: 加载 3D 建筑数据...
+  - generic [ref=e19]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e20] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: ·
+    - link "OSM Buildings" [ref=e21] [cursor=pointer]:
+      - /url: https://osmbuildings.org

@@ -1,0 +1,34 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e751]: 🏙️ 上海陆家嘴 · 3D 挤出
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 颜色
+        - strong: 高度着色
+  - generic [ref=e752]:
+    - generic [ref=e753]: 建筑高度
+    - generic [ref=e755]:
+      - generic [ref=e756]: 低
+      - generic [ref=e757]: 中
+      - generic [ref=e758]: 高
+      - generic [ref=e759]: 超高
+      - generic [ref=e760]: 摩天
+  - generic [ref=e761]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e762] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e763] [cursor=pointer]:
+      - /url: https://f4map.com

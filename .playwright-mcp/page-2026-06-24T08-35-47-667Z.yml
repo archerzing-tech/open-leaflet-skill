@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e7322]: 🏙️ 上海外滩→陆家嘴 · 45° 鸟瞰
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 颜色
+        - strong: 高度着色
+  - generic [ref=e7323]:
+    - generic [ref=e7324]: 建筑高度
+    - generic [ref=e7326]:
+      - generic [ref=e7327]: 低
+      - generic [ref=e7328]: 中
+      - generic [ref=e7329]: 高
+      - generic [ref=e7330]: 超高
+      - generic [ref=e7331]: 摩天
+  - generic:
+    - generic: 加载 f4map 建筑数据...
+  - generic [ref=e7332]: 1407 建筑
+  - generic [ref=e7333]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e7334] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e7335] [cursor=pointer]:
+      - /url: https://f4map.com

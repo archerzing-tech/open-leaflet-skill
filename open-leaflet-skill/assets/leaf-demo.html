@@ -68,10 +68,39 @@ tileLayer.on('load', function() {
   });
 });
 
-// ===== 3. 从 geo-data.js 获取 GeoJSON 数据 =====
+// ===== 3. 多通道数据加载（本地 → DataV → GeoJSON.cn → GitHub CDN 镜像） =====
+function loadGeoJSON(urls, callback) {
+  var index = 0;
+  function tryNext() {
+    if (index >= urls.length) {
+      console.error('所有数据源均加载失败');
+      return;
+    }
+    fetch(urls[index])
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(data) { callback(data); })
+      .catch(function(err) {
+        console.warn('↳ 失败，尝试下一个: ' + urls[index] + ' (' + err.message + ')');
+        index++;
+        tryNext();
+      });
+  }
+  tryNext();
+}
+
+// 本地数据优先，失败时自动 fallback 到在线 API 和 CDN 镜像
 var chinaData = GEO_DATA && GEO_DATA.china_provinces;
-if (!chinaData) {
-  console.error('GeoJSON data not loaded. Make sure data/geo-data.js is included.');
+if (chinaData) {
+  initMap(chinaData);
+} else {
+  console.warn('本地 geo-data.js 未加载，尝试在线数据源...');
+  loadGeoJSON([
+    'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+    'https://geojson.cn/api/china/100000.json',
+    'https://cdn.jsdelivr.net/gh/xyanmi/MapData@main/provinces.cn.geojson'
+  ], function(data) {
+    initMap(data);
+  });
 }
 
 // ===== 4. 信息控件 =====
@@ -142,10 +171,6 @@ function initMap(chinaData) {
         });
       }
     }).addTo(map);
-}
-
-if (chinaData) {
-  initMap(chinaData);
 }
 
 // ===== 6. 图例 =====

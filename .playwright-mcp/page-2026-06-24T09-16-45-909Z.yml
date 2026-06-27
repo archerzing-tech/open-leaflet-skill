@@ -1,0 +1,7 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]: 🏢 上海外滩 · 3D 侧视
+  - generic [ref=e4]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e5] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据 via f4map

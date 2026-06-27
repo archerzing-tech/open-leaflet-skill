@@ -1,0 +1,17 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]: 🏢 香港中环 · 3D 挤出
+  - generic [ref=e5]:
+    - generic [ref=e6]: 建筑高度 (m)
+    - generic [ref=e8]:
+      - generic [ref=e9]: "0"
+      - generic [ref=e10]: "100"
+      - generic [ref=e11]: "200"
+      - generic [ref=e12]: "300"
+      - generic [ref=e13]: 400+
+  - generic [ref=e14]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e15] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e16] [cursor=pointer]:
+      - /url: https://f4map.com

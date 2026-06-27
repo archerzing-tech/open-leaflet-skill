@@ -1,0 +1,14 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - button "Marker" [ref=e3] [cursor=pointer]
+        - button "Marker" [ref=e4] [cursor=pointer]
+        - button "Marker" [ref=e5] [cursor=pointer]
+        - button "Marker" [ref=e6] [cursor=pointer]
+        - button "Marker" [ref=e7] [cursor=pointer]
+        - button "Marker" [ref=e8] [cursor=pointer]
+  - generic [ref=e9]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e10] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright

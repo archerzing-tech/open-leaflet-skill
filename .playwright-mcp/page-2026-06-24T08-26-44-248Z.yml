@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e3]: 🏗️ 深圳福田 · f4map 建筑数据
+  - generic [ref=e4]:
+    - generic [ref=e5]: 建筑高度 (m)
+    - generic [ref=e7]:
+      - generic [ref=e8]: "0"
+      - generic [ref=e9]: "50"
+      - generic [ref=e10]: "100"
+      - generic [ref=e11]: "150"
+      - generic [ref=e12]: 200+
+  - generic:
+    - generic: 加载 f4map 建筑数据...
+  - generic [ref=e13]: 1089 建筑
+  - generic [ref=e14]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e15] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e16] [cursor=pointer]:
+      - /url: https://f4map.com

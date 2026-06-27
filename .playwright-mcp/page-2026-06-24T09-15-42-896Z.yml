@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]: 🏢 香港维多利亚港 · 3D 侧视
+  - generic [ref=e4]:
+    - generic [ref=e5]: 建筑高度 (m)
+    - generic [ref=e7]:
+      - generic [ref=e8]: "0"
+      - generic [ref=e9]: "100"
+      - generic [ref=e10]: "200"
+      - generic [ref=e11]: "300"
+      - generic [ref=e12]: 400+
+  - generic [ref=e13]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e14] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据 via f4map

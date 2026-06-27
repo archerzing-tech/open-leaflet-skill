@@ -1,6 +1,6 @@
 # open-leaflet-skill
 
-Agent skill for generating interactive Leaflet.js map HTML components from natural language descriptions. Supports 2D maps, 3D buildings (f4map polygon extrusion), map card popups/tooltips, visual effects, and choropleth visualization with built-in China province GeoJSON data.
+Agent skill for generating interactive Leaflet.js map HTML components from natural language descriptions. Supports 2D maps, map card popups/tooltips, visual effects, and choropleth visualization with built-in China province GeoJSON data.
 
 > **For the skill definition (agent consumption), see [`open-leaflet-skill/SKILL.md`](./open-leaflet-skill/SKILL.md).**  
 > This README is for humans browsing the repository.
@@ -64,7 +64,6 @@ Then ask your agent to "list available skills" — it should show **leaflet** (o
 Send these prompts to your agent after the skill is installed:
 
 > "把四川省高亮显示，用红色边框，点击弹出省会成都的数据指标卡片"  
-> "显示上海陆家嘴的 3D 建筑场景"  
 > "在成都标出宽窄巷子、锦里、熊猫基地三个景点，带图文卡片"  
 > "做一个全国人口分级统计图，按省份用颜色深浅表示人口密度"
 
@@ -118,79 +117,16 @@ Each example below shows what you can say to your AI agent → the skill process
 
 ---
 
-### 🏙️ Shanghai Lujiazui 3D Skyline
-
-**👤 You say:**
-
-> 显示上海陆家嘴的 3D 建筑天际线，带建筑信息卡片，点击可查看高度/楼层
-
-**🤖 Skill generates:**
-
-![shanghai-3d](pics/screenshot-shanghai-3d.png)
-
-📄 [`open-leaflet-skill/assets/examples/shanghai-3d.html`](./open-leaflet-skill/assets/examples/shanghai-3d.html)
-
----
-
-### 🏗️ Shenzhen Futian 3D Height Coloring
-
-**👤 You say:**
-
-> 展示深圳福田区的 3D 建筑场景，用颜色表示建筑高度，点击查看高度信息
-
-**🤖 Skill generates:**
-
-![shenzhen-3d](pics/screenshot-shenzhen-3d.png)
-
-📄 [`open-leaflet-skill/assets/examples/shenzhen-3d.html`](./open-leaflet-skill/assets/examples/shenzhen-3d.html)
-
----
-
-### 🏢 Hong Kong Central 3D Skyscrapers
-
-**👤 You say:**
-
-> 展示香港中环的摩天大楼 3D 场景，不同高度用不同颜色表示，点击查看建筑详情
-
-**🤖 Skill generates:**
-
-![hongkong-3d](pics/screenshot-hongkong-3d.png)
-
-📄 [`open-leaflet-skill/assets/examples/hongkong-3d.html`](./open-leaflet-skill/assets/examples/hongkong-3d.html)
-
----
-
-## Demos
-
-### 🚁 直升机视角 3D 城市漫游
-
-**👤 You say:**
-
-> 显示上海陆家嘴的 3D 建筑天际线，带直升机倾斜视角，点击查看建筑信息
-
-**🤖 Skill generates:**
-
-![3d-demo](pics/screenshot-3d-demo.png)
-
-📄 [`open-leaflet-skill/assets/leaf-3d-demo.html`](./open-leaflet-skill/assets/leaf-3d-demo.html)
-
-> 支持 3 个城市（上海金茂中心/香港维多利亚港/重庆解放碑），OSMBuildings + 本地 GeoJSON 建筑数据。
-> 点击建筑查看高度/楼层，快捷键 `1`-`3` 切换城市, `S` 切换视角。
-
----
-
 ### All Demo Files
 
 | File | Description |
 |------|-------------|
-| `open-leaflet-skill/assets/leaf-3d-demo.html` | 3D city helicopter view (3 cities: Shanghai/HK/Chongqing) |
 | `open-leaflet-skill/assets/leaf-demo.html` | Province highlight + hover/click interaction |
 | `open-leaflet-skill/assets/leaf-effects.html` | Effects: mask, glow, pulse, marching ants, color transform |
 | `open-leaflet-skill/assets/leaf-card-demo.html` | 6 POI cards + province metric card in 3 modes (popup/tooltip/float) |
-| `open-leaflet-skill/assets/examples/shanghai-3d.html` | Shanghai Jin Mao 3D helicopter view |
-| `open-leaflet-skill/assets/examples/hongkong-3d.html` | Hong Kong Victoria Harbour 3D helicopter view |
-| `open-leaflet-skill/assets/examples/chongqing-3d.html` | Chongqing Jiefangbei 3D helicopter view |
-| `open-leaflet-skill/assets/examples/shenzhen-3d.html` | Shenzhen 3D height coloring |
+| `open-leaflet-skill/assets/examples/sichuan-highlight.html` | Province highlight with metric card |
+| `open-leaflet-skill/assets/examples/chengdu-pois.html` | 6 Chengdu POIs with image cards |
+| `open-leaflet-skill/assets/examples/choropleth-population.html` | Population choropleth by province |
 
 ---
 
@@ -203,9 +139,6 @@ open-leaflet-skill/                       # Project root
 │   ├── screenshot-sichuan.png
 │   ├── screenshot-chengdu.png
 │   ├── screenshot-choropleth.png
-│   ├── screenshot-shanghai-3d.png
-│   ├── screenshot-shenzhen-3d.png
-│   └── screenshot-hongkong-3d.png
 └── open-leaflet-skill/                   # Agent skill root (agentskills.io spec)
     ├── SKILL.md                          # Required: metadata + instructions
     ├── scripts/                          # Optional: executable code
@@ -223,26 +156,16 @@ open-leaflet-skill/                       # Project root
     └── assets/                           # Optional: static resources
         ├── leaf-demo.html
         ├── leaf-effects.html
-        ├── leaf-3d-demo.html
         ├── leaf-card-demo.html
         ├── examples/
         │   ├── sichuan-highlight.html
         │   ├── chengdu-pois.html
-        │   ├── choropleth-population.html
-        │   ├── shanghai-3d.html
-        │   ├── shenzhen-3d.html
-        │   ├── hongkong-3d.html
-        │   └── chongqing-3d.html
+        │   └── choropleth-population.html
         ├── data/                         # GeoJSON data
         │   ├── china_provinces.geojson
         │   ├── taiwan.geojson
         │   ├── hongkong.geojson
-        │   ├── macau.geojson
-        │   └── 3d/                          # 3D building data
-        │       ├── shanghai/buildings.json
-        │       ├── shenzhen/buildings.json
-        │       ├── hongkong/buildings.json
-        │       └── chongqing/buildings.json
+        │   └── macau.geojson
         └── lib/                          # Leaflet 1.9.4 (local)
             ├── leaflet.css
             └── leaflet.js
@@ -250,10 +173,18 @@ open-leaflet-skill/                       # Project root
 
 ## Data Sources
 
-- **China administrative boundaries**: DataV.GeoAtlas `https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json`
-- **Global data**: OpenStreetMap Overpass API `https://overpass-api.de/api/interpreter`
-- **3D buildings**: [f4map](https://f4map.com) Buildings Tile API (`buildings.f4map.com`) — real-time OSM building data with heights, names, levels. Fallback: per-city GeoJSON in `assets/data/3d/`
-- **Placeholder images**: picsum.photos
+本技能支持多通道 GeoJSON 数据获取，针对中国网络环境优化：
+
+| 渠道 | 国内访问 | 推荐场景 |
+|------|---------|---------|
+| DataV.GeoAtlas `geo.datav.aliyun.com` | ✅ 极快 | 实时加载（首选） |
+| GeoJSON.cn `geojson.cn` | ✅ 极快 | 离线/批量获取 |
+| 天地图 `api.tianditu.gov.cn` | ✅ 极快 | 官方合规数据 |
+| 本地文件 `assets/data/` | ✅ 无网络 | 离线/稳定需求 |
+| jsDelivr CDN `cdn.jsdelivr.net` | ✅ 较快 | GitHub 仓库加速 |
+| Overpass API（全球） | ⚠️ 可能受限 | 仅备选 |
+
+> 完整参考 → [`open-leaflet-skill/references/data-sources.md`](./open-leaflet-skill/references/data-sources.md)，含坐标系转换、多通道 fallback 策略、adcode 对照表。
 
 ## License
 

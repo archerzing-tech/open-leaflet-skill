@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - img
+  - generic [ref=e2942]: 🏙️ 上海陆家嘴 · f4map 建筑数据
+  - generic:
+    - generic: —
+    - generic:
+      - text: 高度
+      - strong: —
+      - text: m
+    - generic:
+      - generic:
+        - text: 楼层
+        - strong: —
+      - generic:
+        - text: 颜色
+        - strong: 高度着色
+  - generic [ref=e2943]:
+    - generic [ref=e2944]: 建筑高度
+    - generic [ref=e2946]:
+      - generic [ref=e2947]: 低
+      - generic [ref=e2948]: 中
+      - generic [ref=e2949]: 高
+      - generic [ref=e2950]: 超高
+      - generic [ref=e2951]: 摩天
+  - generic:
+    - generic: 加载 f4map 建筑数据...
+  - generic [ref=e2952]: 2984 建筑
+  - generic [ref=e2953]:
+    - text: ©
+    - link "OpenStreetMap" [ref=e2954] [cursor=pointer]:
+      - /url: https://openstreetmap.org/copyright
+    - text: · 建筑数据
+    - link "f4map" [ref=e2955] [cursor=pointer]:
+      - /url: https://f4map.com

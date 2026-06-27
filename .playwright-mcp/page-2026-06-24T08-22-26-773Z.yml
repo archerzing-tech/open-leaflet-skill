@@ -1,0 +1,52 @@
+- generic [active] [ref=e1]:
+  - link " Discover our solutions" [ref=e2] [cursor=pointer]:
+    - /url: //www.f4map.com
+    - generic [ref=e3]: 
+    - text: Discover our solutions
+  - generic "i to toggle interface" [ref=e4] [cursor=pointer]:
+    - img "F4" [ref=e5]
+  - banner [ref=e13]:
+    - generic [ref=e14]:
+      - generic "i to toggle interface" [ref=e15] [cursor=pointer]:
+        - img "F4" [ref=e16]
+      - generic:
+        - textbox "Search a place..." [ref=e25]
+        - button "" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]: 
+      - navigation:
+        - button "" [ref=e28] [cursor=pointer]:
+          - generic [ref=e29]: 
+        - text:    
+      - generic:    
+  - generic:
+    - generic:
+      - text:       
+      - generic [ref=e31]:
+        - generic [ref=e33]:
+          - generic "Zoom in" [ref=e34]:
+            - button "" [ref=e35] [cursor=pointer]
+          - generic "Zoom out" [ref=e36]:
+            - button "" [ref=e37] [cursor=pointer]
+          - button "" [ref=e38] [cursor=pointer]
+          - generic "Move the camera verticaly in 3D, you can redirect the camera by pressing and holding the right click (or Ctrl and left click) and moving the mouse." [ref=e39]:
+            - generic [ref=e40] [cursor=pointer]: 
+            - generic [ref=e41] [cursor=pointer]: 
+          - generic "Rotate the map in 3D, you can redirect the camera by pressing and holding the right click (or Ctrl and left click) and moving the mouse." [ref=e42]:
+            - button [ref=e43] [cursor=pointer]
+            - button [ref=e45] [cursor=pointer]
+            - button [ref=e46] [cursor=pointer]
+          - generic [ref=e47] [cursor=pointer]:
+            - checkbox "3D" [checked] [ref=e48]
+            - generic [ref=e49]: 3D
+        - generic [ref=e50]:
+          - generic [ref=e51]: 100m
+          - generic [ref=e52]:
+            - link "F4map © F4" [ref=e54] [cursor=pointer]:
+              - /url: http://www.f4map.com
+            - generic [ref=e55]:
+              - text: Map data ©
+              - link "OpenStreetMap contributors" [ref=e56] [cursor=pointer]:
+                - /url: http://www.openstreetmap.org/copyright
+              - generic [ref=e57]: (updated ...)
+            - text: Credits
+  - text:  Last name – First name or Company (required) E-mail (required) Subject Message (required)

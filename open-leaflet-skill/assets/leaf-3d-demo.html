@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D 城市 · 直升机视角</title>
+<title>3D 城市建筑漫游</title>
 <link rel="stylesheet" href="./lib/leaflet.css" />
 <script src="./lib/leaflet.js"></script>
 <script src="./lib/OSMBuildings-Leaflet.js"></script>
+<script src="./data/3d/shanghai/buildings.js"></script>
+<script src="./data/3d/hongkong/buildings.js"></script>
+<script src="./data/3d/chongqing/buildings.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-#map{height:100%;width:100%;background:#e8e8e0}
+#map{height:100%;width:100%;background:#2d2d30}
 .ctrl-panel{position:absolute;top:16px;right:16px;z-index:1000;display:flex;flex-direction:column;gap:8px;max-width:260px}
 .ctrl-btn{padding:8px 14px;border:0;border-radius:8px;background:#fff;color:#333;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .15s;text-align:left;user-select:none}
 .ctrl-btn:hover{background:#f0f0f0;transform:translateY(-1px)}
@@ -27,16 +30,35 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 @keyframes spin{to{transform:rotate(360deg)}}
 .attribution{position:absolute;bottom:4px;right:4px;z-index:999;font-size:10px;color:#aaa;background:rgba(255,255,255,.5);padding:2px 6px;border-radius:4px;pointer-events:none}
 .attribution a{color:#999;text-decoration:none}
+.ring-knob{position:absolute;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#2563eb);left:calc(50% - 10px);top:calc(50% - 10px);transform:translate(0,0);pointer-events:none;box-shadow:0 2px 12px rgba(37,99,235,.5);transition:width .2s,height .2s;z-index:2;border:2px solid rgba(255,255,255,.3)}
+.ring-knob.dragging{width:24px;height:24px;left:calc(50% - 12px);top:calc(50% - 12px)}
+.ring-mode-bar{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
+.ring-mode-btn{border:0;background:rgba(255,255,255,0.12);color:rgba(255,255,255,.4);padding:2px 8px;border-radius:6px;font-size:9px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.ring-mode-btn.active{color:#60a5fa;background:rgba(37,99,235,.3)}
+.ring-mode-btn:hover{color:#fff}
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div class="ctrl-panel">
-  <button class="ctrl-btn active" id="btnTilt">🎯 透视视角</button>
   <div class="location-group">
     <button class="ctrl-btn active" data-loc="shanghai">上海</button>
     <button class="ctrl-btn" data-loc="hongkong">香港</button>
     <button class="ctrl-btn" data-loc="chongqing">重庆</button>
+  </div>
+  <div class="ring-mode-bar">
+    <button class="ring-mode-btn active" data-mode="view">视角</button>
+    <button class="ring-mode-btn" data-mode="pos">位置</button>
+  </div>
+  <div class="control-ring" id="controlRing" style="position:relative;width:140px;height:140px;margin:0 auto;border-radius:50%;background:rgba(20,20,25,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:2px solid rgba(255,255,255,0.15);cursor:grab;user-select:none;touch-action:none;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div style="position:absolute;top:12px;left:12px;right:12px;bottom:12px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);pointer-events:none"></div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:3">
+      <span style="color:rgba(255,255,255,.35);font-size:9px;display:block;letter-spacing:1px;margin-bottom:1px" id="ringMode">视角</span>
+      <span style="color:#60a5fa;font-size:17px;font-weight:700;display:block;line-height:1.2" id="ringTilt">55°</span>
+      <span style="color:rgba(255,255,255,.5);font-size:10px;display:block;margin-top:1px" id="ringAzim">旋转 348°</span>
+    </div>
+    <div class="ring-knob" id="ringKnob"></div>
+    <button id="ringReset" style="position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);border:0;background:rgba(255,255,255,0.12);color:rgba(255,255,255,.6);padding:3px 14px;border-radius:6px;font-size:11px;cursor:pointer;transition:color .2s,background .2s;white-space:nowrap">↺ 重置视角</button>
   </div>
 </div>
 <div class="tip" id="tip"></div>
@@ -47,68 +69,57 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 <div class="attribution">© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · 建筑数据 © OSM</div>
 <script>
 var locations = {
-  shanghai:  { lat: 31.241, lng: 121.500, zoom: 16, file: './data/3d/shanghai/buildings.json', name: '上海金茂中心' },
-  hongkong:  { lat: 22.285, lng: 114.160, zoom: 15, file: './data/3d/hongkong/buildings.json', name: '香港维港' },
-  chongqing: { lat: 29.562, lng: 106.574, zoom: 16, file: './data/3d/chongqing/buildings.json', name: '重庆解放碑' }
+  shanghai:  { lat: 31.241, lng: 121.500, zoom: 16, name: '上海金茂中心' },
+  hongkong:  { lat: 22.285, lng: 114.160, zoom: 16, name: '香港维港' },
+  chongqing: { lat: 29.562, lng: 106.574, zoom: 16, name: '重庆解放碑' }
 };
 
 var map = L.map('map', {
   zoomControl: false, attributionControl: false
 });
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19
+L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+  maxZoom: 18, subdomains: '1234'
 }).addTo(map);
+// Darken tile layer for contrast with 3D buildings
+setTimeout(function() {
+  var pane = document.querySelector('.leaflet-tile-pane');
+  if (pane) pane.style.filter = 'brightness(0.35) contrast(1.6) saturate(0.3) grayscale(0.25)';
+}, 100);
 
 var osmb = new OSMBuildings(map);
-osmb.style({ color: '#e8e8e8', roofColor: '#f5f5f0', altColor: '#d0d0d0', shadows: false });
-
-// Helicopter perspective tilt
-var tiltEnabled = true;
-var tiltApplied = false;
-function applyTilt(on) {
-  document.querySelectorAll('.leaflet-overlay-pane canvas').forEach(function(c) {
-    c.style.transform = on ? 'perspective(900px) rotateX(45deg)' : '';
-    c.style.transformOrigin = 'center bottom';
-  });
-}
-var origOnAdd = osmb.onAdd;
-osmb.onAdd = function(m) {
-  origOnAdd.call(this, m);
-  if (!tiltApplied) { tiltApplied = true; setTimeout(function() { applyTilt(tiltEnabled); }, 50); }
-};
+osmb.style({ color: '#c8ced8', roofColor: '#a8b0bc', altColor: '#d8dce4', shadows: true });
 
 var tip = document.getElementById('tip');
 var loading = document.getElementById('loading');
-var btnTilt = document.getElementById('btnTilt');
 var locBtns = document.querySelectorAll('[data-loc]');
 var activeLocation = 'shanghai';
-var WALL_COLOR = '#e8e8e8', ROOF_COLOR = '#f5f5f0', ALT_COLOR = '#d0d0d0';
+function processFeatures(data) {
+  return data.features.map(function(f) {
+    var h = f.properties.height || 20;
+    var coords = f.geometry.coordinates[0].map(function(c) {
+      return [c[1], c[0]]; // Swap [lat, lng] to [lng, lat]
+    });
+    coords.push(coords[0]);
+    return {
+      type: 'Feature',
+      properties: { height: h, wallColor: '#b0b8c5', roofColor: '#8a92a0', altColor: '#c5ccd8' },
+      geometry: { type: 'Polygon', coordinates: [coords] }
+    };
+  });
+}
 
-function loadBuildings(file) {
+var BUILDING_DATA = {
+  shanghai: processFeatures(SHANGAI_BUILDINGS),
+  hongkong: processFeatures(HONGKONG_BUILDINGS),
+  chongqing: processFeatures(CHONGQING_BUILDINGS)
+};
+
+function loadBuildings(key) {
   loading.classList.remove('hidden');
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', file, true);
-  xhr.onload = function() {
-    try {
-      var data = JSON.parse(xhr.responseText);
-      var features = data.features.map(function(f) {
-        var h = f.properties.height || 20;
-        var coords = f.geometry.coordinates[0].map(function(c) {
-          return [c[1], c[0]]; // Swap [lat, lng] to [lng, lat]
-        });
-        coords.push(coords[0]);
-        return {
-          type: 'Feature',
-          properties: { height: h, wallColor: WALL_COLOR, roofColor: ROOF_COLOR, altColor: ALT_COLOR },
-          geometry: { type: 'Polygon', coordinates: [coords] }
-        };
-      });
-      osmb.set({ type: 'FeatureCollection', features: features });
-    } catch(e) { console.error(e); }
-    loading.classList.add('hidden');
-  };
-  xhr.onerror = function() { loading.classList.add('hidden'); };
-  xhr.send();
+  try {
+    osmb.set({ type: 'FeatureCollection', features: BUILDING_DATA[key] });
+  } catch(e) { console.error(e); }
+  loading.classList.add('hidden');
 }
 
 function switchLocation(key) {
@@ -117,15 +128,8 @@ function switchLocation(key) {
   var loc = locations[key];
   locBtns.forEach(function(b) { b.classList.toggle('active', b.dataset.loc === key); });
   map.setView([loc.lat, loc.lng], loc.zoom);
-  setTimeout(function() { loadBuildings(loc.file); }, 300);
+  setTimeout(function() { loadBuildings(key); }, 300);
 }
-
-btnTilt.addEventListener('click', function() {
-  tiltEnabled = !tiltEnabled;
-  this.classList.toggle('active');
-  this.textContent = tiltEnabled ? '🎯 透视视角' : '🗺️ 俯视平面';
-  applyTilt(tiltEnabled);
-});
 
 locBtns.forEach(function(b) {
   b.addEventListener('click', function() { switchLocation(this.dataset.loc); });
@@ -143,7 +147,112 @@ document.addEventListener('keydown', function(e) {
   var keys = ['1','2','3'];
   var i = keys.indexOf(e.key);
   if (i >= 0) switchLocation(Object.keys(locations)[i]);
-  if (e.key === 's' || e.key === 'S') btnTilt.click();
+});
+
+// === Control Ring: dual-mode ===
+var controlRing = document.getElementById('controlRing');
+var ringKnob = document.getElementById('ringKnob');
+var ringTilt = document.getElementById('ringTilt');
+var ringAzim = document.getElementById('ringAzim');
+var ringMode = document.getElementById('ringMode');
+var ringReset = document.getElementById('ringReset');
+var RK = 45;
+var curMode = 'view';
+var curTilt = 0, curAzim = 0;
+var initZoom = 16;
+
+function applyView(tilt, azim) {
+  var op = document.querySelector('.leaflet-overlay-pane');
+  if (!op) return;
+  if (tilt > 0 || azim > 0) {
+    var t = '';
+    if (azim > 0) t += 'rotateY(' + azim + 'deg) ';
+    if (tilt > 0) t += 'rotateX(' + tilt + 'deg)';
+    op.style.transform = 'perspective(900px) ' + t;
+    op.style.transformOrigin = 'bottom center';
+    op.style.transformStyle = 'preserve-3d';
+  } else {
+    op.style.transform = '';
+    op.style.transformOrigin = '';
+    op.style.transformStyle = '';
+  }
+}
+
+function updateRing(dx, dy) {
+  var dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist > RK) { dx = dx/dist * RK; dy = dy/dist * RK; }
+  ringKnob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+
+  if (curMode === 'view') {
+    curTilt = dy > 0 ? 0 : Math.min(60, Math.round(-dy / RK * 60));
+    curAzim = Math.round((dx / RK + 1) / 2 * 360);
+    if (curAzim < 0) curAzim = 0; if (curAzim > 360) curAzim = 360;
+    ringTilt.textContent = curTilt + '°';
+    ringAzim.textContent = '旋转 ' + curAzim + '°';
+    applyView(curTilt, curAzim);
+  } else {
+    var zoomDelta = Math.round(-dy / RK * 3 + dx / RK * 1.5);
+    var zoomTarget = Math.max(14, Math.min(19, initZoom + zoomDelta));
+    map.setZoom(zoomTarget);
+    ringTilt.textContent = 'Z' + zoomTarget;
+    ringAzim.textContent = '缩放 ' + zoomTarget;
+  }
+}
+
+controlRing.addEventListener('mousedown', function(e) {
+  e.preventDefault();
+  var rect = controlRing.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  ringKnob.classList.add('dragging');
+  function onMove(me) { updateRing(me.clientX - cx, me.clientY - cy); }
+  function onUp() {
+    ringKnob.classList.remove('dragging');
+    if (curMode === 'pos') initZoom = map.getZoom();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});
+controlRing.addEventListener('touchstart', function(e) {
+  var rect = controlRing.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  ringKnob.classList.add('dragging');
+  function onMove(te) {
+    te.preventDefault();
+    var t = te.touches[0];
+    updateRing(t.clientX - cx, t.clientY - cy);
+  }
+  function onEnd() {
+    ringKnob.classList.remove('dragging');
+    if (curMode === 'pos') initZoom = map.getZoom();
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+  }
+  document.addEventListener('touchmove', onMove, {passive:false});
+  document.addEventListener('touchend', onEnd);
+});
+ringReset.addEventListener('click', function() {
+  if (curMode === 'view') {
+    updateRing(42.0, -41.2);
+    map.setZoom(initZoom);
+  } else {
+    initZoom = 16;
+    updateRing(0, 0);
+  }
+});
+
+// Mode switching
+var modeBtns = document.querySelectorAll('.ring-mode-btn');
+modeBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    modeBtns.forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    curMode = this.dataset.mode;
+    ringMode.textContent = curMode === 'view' ? '视角' : '位置';
+    initZoom = map.getZoom();
+    updateRing(0, 0);
+  });
 });
 
 if (window.ResizeObserver) {
@@ -153,7 +262,10 @@ if (window.ResizeObserver) {
 // Init
 var def = locations.shanghai;
 map.setView([def.lat, def.lng], def.zoom);
-setTimeout(function() { loadBuildings(def.file); }, 300);
+setTimeout(function() {
+  loadBuildings('shanghai');
+  setTimeout(function() { updateRing(42.0, -41.2); }, 400);
+}, 300);
 </script>
 </body>
 </html>
